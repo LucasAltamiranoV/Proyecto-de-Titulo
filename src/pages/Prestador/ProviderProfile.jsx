@@ -4,7 +4,7 @@ import axios from 'axios';
 import { AuthContext } from '../../context/AuthContext';
 import ProfileCard from '../../components/ProfileCard';
 import HorarioEditable from '../../components/HorarioEditable';
-import { updateAvailability } from '../../services/providerService';
+import { updateAvailability, uploadAvatar } from '../../services/providerService';
 import { Container, Row, Col, Spinner, Button } from 'react-bootstrap';
 import BookingCalendar from '../../components/PrestadorServicio/BookingCalendar'
 import '../../styles/PageStyles/ProviderProfile.css';
@@ -64,27 +64,9 @@ export default function MiPerfilProvider() {
 
   const handleSaveChanges = async () => {
     if (!imageFile) return;
-    const formData = new FormData();
-    formData.append('imagen', imageFile);
-
     try {
-      const url = `http://localhost:4000/api/providers/upload-profile-image/${user._id}`;
-      console.log('📤 Subiendo imagen a:', url);
-      const res = await axios.post(
-        url,
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      console.log('✅ upload response =', res.data);
-      setProviderData(prev => ({
-        ...prev,
-        imagenUrl: res.data.imagenUrl,
-      }));
+      const res = await uploadAvatar(user._id, token, imageFile);
+      setProviderData(prev => ({ ...prev, imagenUrl: res.imagenUrl }));
     } catch (error) {
       console.error('❌ Error al guardar la imagen', error.response?.data || error);
     }

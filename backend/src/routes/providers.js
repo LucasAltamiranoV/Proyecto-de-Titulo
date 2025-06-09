@@ -6,6 +6,7 @@ const multer  = require('multer');
 const path    = require('path');
 const fs      = require('fs');
 const Provider = require('../models/Provider');
+const Reservation = require('../models/Reservation');
 const router = express.Router();
 
 // ------------------------------------------------------------------
@@ -99,6 +100,19 @@ router.get(
     }
   }
 );
+// ------------------------------------------------------------------
+// GET /api/providers/:id/reservations
+//    Lista todas las reservas de ese proveedor
+// ------------------------------------------------------------------
+router.get('/:id/reservations', async (req, res) => {
+  try {
+    const reservas = await Reservation.find({ provider: req.params.id });
+    res.json(reservas);
+  } catch (err) {
+    console.error('Error al obtener reservas:', err);
+    res.status(500).json({ error: 'Error al obtener reservas' });
+  }
+});
 
 // ------------------------------------------------------------------
 // 4) PUT /api/providers/detalle/:id
@@ -122,12 +136,15 @@ router.put('/descripcion', authenticate, async (req, res) => {
 });
 //----------------------------------------------------------
 // 5) POST /api/providers/upload-profile-image/:id
-//    Sube la imagen de perfil de un proveedor
+
 // ------------------------------------------------------------------
 // Subir imagen de perfil del proveedor autenticado
-router.post('/upload-profile-image', authenticate, upload.single('imagen'), async (req, res) => {
+router.post('/:id/avatar', authenticate, upload.single('imagen'), async (req, res) => {
   try {
-    const provider = await Provider.findById(req.user.id);
+        if (req.user.id !== req.params.id) {
+      return res.status(403).json({ error: 'No autorizado' });
+    }
+    const provider = await Provider.findById(req.params.id);
     if (!provider) return res.status(404).json({ error: 'Proveedor no encontrado' });
     provider.imagenUrl = `/uploads/${req.file.filename}`;
     await provider.save();

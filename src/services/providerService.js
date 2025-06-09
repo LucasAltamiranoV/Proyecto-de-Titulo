@@ -10,3 +10,15 @@ export const updateAvailability = async (token, disponibilidad) => {
   );
   return res.data;
 };
+
+export const uploadAvatar = async (id, token, file) => {
+  const formData = new FormData();
+  formData.append('imagen', file);
+  const res = await axios.post(`${API_URL}/${id}/avatar`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.data;
+};

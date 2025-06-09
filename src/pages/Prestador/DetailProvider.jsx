@@ -8,20 +8,53 @@ import Horario from '../../components/Horario';
 import { FaMapMarkerAlt } from 'react-icons/fa';
 import { AuthContext } from '../../context/AuthContext';
 import BookingCalendar from '../../components/PrestadorServicio/BookingCalendar'
+import { getProviderReservations, createReservation } from '../../services/reservationService';
 
 
 export default function DetailProvider() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useContext(AuthContext);
+   const { user, token } = useContext(AuthContext);
   const [provider, setProvider] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [events, setEvents] = useState([]);
+
+  const handleSelect = async (info) => {
+    if (!user) {
+      alert('Debe iniciar sesión para reservar');
+      return;
+    }
+    try {
+      await createReservation({
+        providerId: id,
+        date: info.startStr.slice(0, 10),
+        startTime: info.startStr.slice(11, 16)
+      }, token);
+      alert('Reserva solicitada');
+    } catch (err) {
+      console.error('Error creando reserva:', err);
+    }
+  };
 
   useEffect(() => {
+    setLoading(true);
     axios
       .get(`http://localhost:4000/api/providers/detalle/${id}`)
       .then(res => setProvider(res.data))
-      .catch(err => console.error('Error al cargar proveedor:', err))
+            .catch(err => console.error('Error al cargar proveedor:', err));
+
+    getProviderReservations(id)
+      .then(res => {
+        const ev = res
+          .filter(r => r.status === 'accepted')
+          .map(r => ({
+            title: 'Reservado',
+            start: `${r.date}T${r.startTime}`,
+            end: `${r.date}T${r.endTime}`,
+          }));
+        setEvents(ev);
+      })
+      .catch(err => console.error('Error al obtener reservas:', err))
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -102,7 +135,7 @@ export default function DetailProvider() {
       <div className="mt-5">
         
       <h5 className="mt-4">Agenda tu reserva</h5>
-      <BookingCalendar />
+      <BookingCalendar events={events} onSelect={handleSelect} />
       </div>
     </div>
   );
