@@ -12,8 +12,7 @@ const reservationSchema = new mongoose.Schema({
     required: true
   },
   date: { type: String, required: true },      // YYYY-MM-DD
-  startTime: { type: String, required: true }, // HH:mm
-  endTime: { type: String, required: true },   // HH:mm
+  timeSlot: { type: String, required: true },
   status: {
     type: String,
     enum: ['pending', 'accepted', 'rejected'],

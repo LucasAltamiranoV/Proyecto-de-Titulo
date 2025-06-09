@@ -22,15 +22,15 @@ function authenticate(req, res, next) {
 const days = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
 
 router.post('/', authenticate, async (req, res) => {
-  const { providerId, date, startTime } = req.body;
-  if (!providerId || !date || !startTime) {
+  const { providerId, date, timeSlot } = req.body;
+  if (!providerId || !date || !timeSlot) {
     return res.status(400).json({ error: 'Faltan campos requeridos' });
   }
   try {
     const provider = await Provider.findById(providerId);
     if (!provider) return res.status(404).json({ error: 'Proveedor no encontrado' });
     const day = days[new Date(date).getDay()];
-    if (!provider.disponibilidad[day]?.includes(startTime)) {
+     if (!provider.disponibilidad[day]?.includes(timeSlot)) {
       return res.status(400).json({ error: 'Horario no disponible' });
     }
     const endTime = startTime;
@@ -38,8 +38,7 @@ router.post('/', authenticate, async (req, res) => {
       provider: providerId,
       user: req.user.id,
       date,
-      startTime,
-      endTime,
+      timeSlot,
       status: 'pending'
     });
     await reservation.save();
@@ -68,7 +67,7 @@ router.put('/:id/status', authenticate, async (req, res) => {
     const provider = await Provider.findById(reserv.provider);
     const day = days[new Date(reserv.date).getDay()];
     if (status === 'accepted') {
-      if (!provider.disponibilidad[day]?.includes(reserv.startTime)) {
+      if (!provider.disponibilidad[day]?.includes(reserv.timeSlot)) {
         return res.status(400).json({ error: 'Horario ya no disponible' });
       }
       provider.disponibilidad[day] = provider.disponibilidad[day].filter(h => h !== reserv.startTime);

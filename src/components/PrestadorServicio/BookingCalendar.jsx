@@ -5,11 +5,12 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 
 
+
 export default function BookingCalendar({ events = [], onSelect }) {
   const [localEvents, setLocalEvents] = useState([]);
 
   const handleDateSelect = (selectInfo) => {
-     if (onSelect) {
+    if (onSelect) {
       onSelect(selectInfo);
       return;
     }
@@ -18,7 +19,7 @@ export default function BookingCalendar({ events = [], onSelect }) {
     calendarApi.unselect();
 
     if (title) {
-     setLocalEvents([...localEvents, {
+      setLocalEvents([...localEvents, {
         id: String(localEvents.length),
         title,
         start: selectInfo.startStr,
@@ -31,7 +32,9 @@ export default function BookingCalendar({ events = [], onSelect }) {
   return (
     <FullCalendar
       plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-      initialView="dayGridMonth"
+      initialView="timeGridWeek"
+      slotDuration="01:00:00"
+      allDaySlot={false}
       selectable
       editable={false}
      events={events.length ? events : localEvents}

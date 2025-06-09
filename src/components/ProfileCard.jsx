@@ -12,13 +12,13 @@ export default function ProfileCard({
   onSaveDescription,         // callback opcional para guardar la descripción
   children                   // sección extra (services, availability, etc.)
 }) {
-  const [imagePreview, setImagePreview] = useState('');
+  const [imagePreview, setImagePreview] = useState(null);
   const [description, setDescription] = useState('');
 
   useEffect(() => {
-    // imagen de fallback si no viene en data
-    const imgUrl = data?.[imageField] || 'https://www.gravatar.com/avatar?d=mp';
-    setImagePreview(imgUrl);
+    const imgUrl = data?.[imageField];
+    setImagePreview(imgUrl || null);
+
     setDescription(data?.[descriptionField] || '');
   }, [data, imageField, descriptionField]);
 
@@ -40,12 +40,14 @@ export default function ProfileCard({
       </div>
 
       <div className="profile-img-container">
-        <img
-          src={imagePreview}
-          alt="Perfil"
-          className="profile-img"
-          onError={() => setImagePreview('https://www.gravatar.com/avatar?d=mp')}
-        />
+            {imagePreview && (
+          <img
+            src={imagePreview || undefined}
+            alt="Perfil"
+            className="profile-img"
+            onError={() => setImagePreview(null)}
+          />
+        )}
       </div>
 
       <Card.Body className="profile-info">
