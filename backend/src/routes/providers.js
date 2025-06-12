@@ -128,19 +128,25 @@ router.put('/descripcion', authenticate, async (req, res) => {
 // Subir imagen de perfil del proveedor autenticado
 router.post('/:id/avatar', authenticate, upload.single('imagen'), async (req, res) => {
   try {
-        if (req.user.id !== req.params.id) {
+    if (req.user.id !== req.params.id) {
       return res.status(403).json({ error: 'No autorizado' });
     }
     const provider = await Provider.findById(req.params.id);
     if (!provider) return res.status(404).json({ error: 'Proveedor no encontrado' });
-    provider.imagenUrl = `/uploads/${req.file.filename}`;
+
+    // La URL completa de la imagen
+    const imagenUrl = `/uploads/${req.file.filename}`;
+    provider.imagenUrl = imagenUrl;
+
+    // Guardamos la URL en la base de datos
     await provider.save();
-    res.json({ imagenUrl: provider.imagenUrl });
+    res.json({ imagenUrl: imagenUrl });  // Devolver la URL completa
   } catch (err) {
     console.error('Error al subir imagen:', err);
     res.status(500).json({ error: 'Error al subir imagen' });
   }
 });
+
 // ------------------------------------------------------------------
 // POST /api/providers/:id/gallery
 //    Sube una imagen a la galería del proveedor

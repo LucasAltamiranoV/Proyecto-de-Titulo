@@ -1,26 +1,32 @@
-import React, { useState, useEffect } from 'react';
-import { Card, Button, Form } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';  // Importa useState y useEffect
+import { Card, Button, Form } from 'react-bootstrap';  // Importa los componentes de Bootstrap
 import PropTypes from 'prop-types';
 import '../styles/PageStyles/ProfileCard.css';
 
 export default function ProfileCard({
   data,
-  nameField = 'nombre',
-  emailField = 'correo',
-  imageField = 'imagenUrl',
-  descriptionField = 'descripcion',
   onImageChange,
   onSaveDescription,
+  imageField,  // Propiedad para el campo de la imagen
+  nameField,   // Propiedad para el campo del nombre
+  emailField,  // Propiedad para el campo del correo
+  descriptionField, // Propiedad para el campo de descripción
   children
 }) {
-  // Establecer URL remota de imagen y previsualización local
   const [remoteUrl, setRemoteUrl] = useState(null);
   const [localPreview, setLocalPreview] = useState(null);
   const [description, setDescription] = useState('');
 
+  const API_URL = 'http://localhost:4000';
+
   // Actualiza la URL remota cuando cambie data[imageField]
   useEffect(() => {
-    setRemoteUrl(data?.[imageField] || null);
+    if (data?.[imageField]) {
+      // Construir la URL completa de la imagen
+      setRemoteUrl(`${API_URL}${data[imageField]}`);
+    } else {
+      setRemoteUrl(null);
+    }
   }, [data, imageField]);
 
   // Actualiza la descripción cuando cambie
@@ -32,9 +38,8 @@ export default function ProfileCard({
   const handleImageChange = e => {
     const file = e.target.files[0];
     if (!file) return;
-    // Establece la previsualización local de la imagen
-    setLocalPreview(URL.createObjectURL(file));
-    onImageChange && onImageChange(file);
+    setLocalPreview(URL.createObjectURL(file));  // Previsualiza la imagen localmente
+    onImageChange && onImageChange(file);  // Llama a la función proporcionada para subir la imagen
   };
 
   // Manejo de la actualización de descripción
@@ -108,12 +113,11 @@ export default function ProfileCard({
 // PropTypes para validaciones
 ProfileCard.propTypes = {
   data: PropTypes.object.isRequired,
-  nameField: PropTypes.string,
-  emailField: PropTypes.string,
-  imageField: PropTypes.string,
-  descriptionField: PropTypes.string,
-  onImageChange: PropTypes.func,
-  onSaveDescription: PropTypes.func,
+  onImageChange: PropTypes.func,    // Función para manejar la subida de imagen
+  onSaveDescription: PropTypes.func,  // Función para manejar la descripción
+  imageField: PropTypes.string.isRequired,  // Propiedad para la imagen
+  nameField: PropTypes.string.isRequired,   // Propiedad para el nombre
+  emailField: PropTypes.string.isRequired,  // Propiedad para el correo
+  descriptionField: PropTypes.string.isRequired, // Propiedad para la descripción
   children: PropTypes.node
 };
-

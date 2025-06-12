@@ -78,9 +78,17 @@ export default function MiPerfilProvider() {
   };
 
   // Función para manejar el cambio de imagen
-  const handleImageChange = (file) => {
-    setImageFile(file);
-  };
+    const handleImageChange = async (file) => {
+      setImageFile(file);
+      try {
+        const data = await uploadAvatar(user._id, token, file);  // Llamamos al servicio para subir la imagen
+        setProviderData(prev => ({ ...prev, imagenUrl: data.imagenUrl }));  // Actualiza la URL de la imagen en el estado
+      } catch (err) {
+        console.error('Error al guardar la imagen', err);
+      }
+    };
+
+
 
   // Función para guardar la imagen en el servidor
   const handleSaveImage = async () => {
@@ -125,13 +133,13 @@ export default function MiPerfilProvider() {
       <Row className="justify-content-center">
         <Col md={8} lg={6}>
           <ProfileCard
-            data={providerData}                    
-            nameField="nombre"                     
-            emailField="correo"                    
-            imageField="imagenUrl"                 
-            descriptionField="descripcion"         
+            data={providerData}                          
             onImageChange={handleImageChange}      
             onSaveDescription={handleSaveDescription} 
+            imageField="imagenUrl"       // Pasa la clave para la imagen
+            nameField="nombre"           // Pasa la clave para el nombre
+            emailField="correo"          // Pasa la clave para el correo
+            descriptionField="descripcion" // Pasa la clave para la descripción
           />
 
           <div className="mt-4">

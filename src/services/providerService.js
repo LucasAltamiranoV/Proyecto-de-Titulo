@@ -26,12 +26,13 @@ export const uploadAvatar = async (id, token, file) => {
         Authorization: `Bearer ${token}`,
       },
     });
-    return res.data;
+    return res.data; // La respuesta debe incluir la URL de la imagen
   } catch (error) {
     console.error('Error al subir la imagen de perfil:', error);
     throw new Error('No se pudo subir la imagen de perfil');
   }
 };
+
 
 // Sube imágenes a la galería
 export const uploadGalleryImage = async (id, token, file) => {
