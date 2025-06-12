@@ -5,7 +5,7 @@ import { AuthContext } from '../../context/AuthContext';
 import { useLocation } from 'react-router-dom';
 import ChatRoom from '../../components/ChatRoom';
 import axios from 'axios';
-import { Container, Row, Col, Button, Card, ListGroup } from 'react-bootstrap';
+import { Container, Row, Col, Card, ListGroup } from 'react-bootstrap';
 
 export default function Inbox() {
   const { user } = useContext(AuthContext);

@@ -128,15 +128,6 @@
   font-size: 0.9rem;
 }
 
-/* Children sections (services, availability) */
-.profile-info h6 {
-  font-size: 1rem;
-  font-weight: 600;
-  margin-top: 1rem;
-  margin-bottom: 0.5rem;
-  color: var(--text-color);
-}
-
 .profile-info ul {
   list-style: none;
   padding: 0;
@@ -152,22 +143,6 @@
   padding: 0.4rem 0.8rem;
   border-radius: 0.5rem;
   font-size: 0.85rem;
-}
-
-/* Availability grid */
-.availability-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 0.75rem;
-  margin-top: 0.5rem;
-}
-
-.availability-grid div {
-  background-color: #fafafa;
-  border-radius: 0.5rem;
-  padding: 0.5rem;
-  font-size: 0.85rem;
-  color: var(--secondary-text);
 }
 
 /* Responsive adjustments */

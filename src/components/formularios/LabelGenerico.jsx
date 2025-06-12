@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+
 
 /**
  * Componente genérico de etiqueta + input usando Bootstrap.

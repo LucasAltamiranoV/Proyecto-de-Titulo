@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import NavbarLogOut from './components/NavbarLogOut';
 import Footer from './components/FooterReact';
-import BotonAyuda from './components/BotonAyuda';
-import MarcaDeAgua from './components/MarcaDeAgua';
+import BotonAyuda from './components/BotonAyuda'
 
 import Home from './pages/All/Home';
 import Soporte from './pages/All/Soporte';
@@ -33,8 +32,6 @@ import Inbox from './pages/All/Inbox'
 
 
 function App() {
-  const [desc, setDesc] = useState('');
-
   useEffect(() => {
     console.log('API base URL →', process.env.REACT_APP_API_URL);
   }, []);

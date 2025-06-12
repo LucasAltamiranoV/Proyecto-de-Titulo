@@ -13,10 +13,10 @@ export const register = async (req, res) => {
     nombre,
     correo,
     clave,
-    accountType,    // 'User' o 'Provider'
+    accountType,    // 'User' o 'Provider' //estoo, como se hace, crea o envia????????????
     servicios,      // solo para Provider
     ciudad,         // solo para Provider
-    descripcion     // solo para Provider
+    descripcion                          //campo para ambos usuarios
   } = req.body;
 
   // Validaciones básicas
@@ -94,10 +94,6 @@ export const confirmEmail = async (req, res) => {
         imagenUrl: '',
         calificacion: 0,
         galeria: [],
-        disponibilidad: {
-          lunes: [], martes: [], miercoles: [],
-          jueves: [], viernes: [], sabado: [], domingo: []
-        }
       });
       await newProvider.save();
     } else {
@@ -163,8 +159,6 @@ export const login = async (req, res) => {
   }
 };
 
-// ... las demás funciones (randomProfiles, searchProviders) no cambian
-
 // Obtener perfiles aleatorios de proveedores
 export const randomProfiles = async (req, res) => {
   try {
@@ -173,7 +167,7 @@ export const randomProfiles = async (req, res) => {
       _id: p._id,
       nombre: p.nombre,
       correo: p.correo,
-      imagenUrl: p.imagenUrl,
+      imagenUrl: p.imagenUrl, // me carga la imagen pero solo la url, no la imagen en sí ¡?????
       servicios: p.servicios,
       ciudad: p.ciudad,
       calificacion: p.calificacion,
@@ -216,3 +210,4 @@ export const searchProviders = async (req, res) => {
     return res.status(500).json({ error: 'Error al buscar proveedores.' });
   }
 };
+//todo check

@@ -5,7 +5,6 @@ import logo from '../assets/Logo2.png';
 import ImageDropdown from './ImageDropdown'; // 👈 importa tu dropdown
 import { AuthContext } from '../context/AuthContext'; // Importa el contexto
 
-const usuarioActual = null;
 
 function NavbarLogOut() {
 

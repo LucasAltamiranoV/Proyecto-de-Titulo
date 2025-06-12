@@ -50,8 +50,11 @@ router.get('/perfil/:id', async (req, res) => {
 
 // 4) POST /api/users/upload-profile-image/:id
 //    Coincide con lo que usas en el frontend
-router.post('/upload-profile-image/:id', upload.single('imagen'), async (req, res) => {
+router.post('/upload-profile-image/:id', authenticate, upload.single('imagen'), async (req, res) => {
   try {
+    if (req.user.id !== req.params.id) {
+      return res.status(403).json({ error: 'No autorizado' });
+    }
     const usuario = await User.findById(req.params.id);
     if (!usuario) return res.status(404).json({ error: 'Usuario no encontrado' });
     usuario.imagenUrl = `/uploads/${req.file.filename}`;

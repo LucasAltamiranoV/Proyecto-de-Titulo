@@ -24,7 +24,7 @@ export default function ChatRoom({ miUsuario, otroUsuario }) {
     if (!miUsuario || !otroUsuario) return;
 
     const miModel     = deriveModel(miUsuario);
-    const otroModel   = deriveModel(otroUsuario);
+
 
     // Conexión inicial
     socketRef.current = io('http://localhost:4000', {

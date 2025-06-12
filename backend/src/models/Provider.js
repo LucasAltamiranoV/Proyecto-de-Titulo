@@ -1,4 +1,3 @@
-// models/Provider.js
 const mongoose = require('mongoose');
 
 const proveedorSchema = new mongoose.Schema({
@@ -12,14 +11,14 @@ const proveedorSchema = new mongoose.Schema({
   descripcion: { type: String },
   galeria: { type: [String], default: [] }, // URLs de imágenes
   disponibilidad: {
-    lunes: [String],
-    martes: [String],
-    miercoles: [String],
-    jueves: [String],
-    viernes: [String],
-    sabado: [String],
-    domingo: [String]
-  }
+    domingo: { type: [String], default: [] },
+    lunes: { type: [String], default: [] },
+    martes: { type: [String], default: [] },
+    miercoles: { type: [String], default: [] },
+    jueves: { type: [String], default: [] },
+    viernes: { type: [String], default: [] },
+    sabado: { type: [String], default: [] },
+  },
 }, {
   timestamps: true
 });
@@ -30,5 +29,3 @@ module.exports = mongoose.model(
   proveedorSchema,
   'proveedors'
 );
-
-
