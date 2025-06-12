@@ -1,12 +1,10 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext } from 'react'; 
 import { Container, Row, Col, Spinner, Button } from 'react-bootstrap';
 import { AuthContext } from '../../context/AuthContext';
 import ProfileCard from '../../components/ProfileCard';
 import Calendar from '../../components/PrestadorServicio/Calendar';
-import EventRequestTable from '../../components/PrestadorServicio/EventRequestTable';  // Importa el componente de la tabla de solicitudes
-import { getProviderProfile } from '../../services/providerService';
-import { acceptEventRequest, rejectEventRequest,uploadAvatar, updateDescription } from '../../services/providerService';  // Asegúrate de tener estas funciones
-
+import EventRequestTable from '../../components/PrestadorServicio/EventRequestTable';
+import { getProviderProfile, getProviderEventRequests, acceptEventRequest, rejectEventRequest, uploadAvatar, updateDescription } from '../../services/providerService'; 
 
 export default function MiPerfilProvider() {
   const { user, token } = useContext(AuthContext);
@@ -26,8 +24,11 @@ export default function MiPerfilProvider() {
       try {
         const data = await getProviderProfile(user._id, token);
         setProviderData(data);
+        // Obtener las solicitudes de eventos para este proveedor
+        const requests = await getProviderEventRequests(user._id, token);
+        setEventRequests(requests);  // Establece las solicitudes de eventos
       } catch (err) {
-        console.error('Error al obtener perfil:', err);
+        console.error('Error al obtener perfil o solicitudes:', err);
       } finally {
         setLoading(false);
       }
@@ -38,10 +39,8 @@ export default function MiPerfilProvider() {
   // Función para manejar la aceptación de una solicitud
   const handleAcceptRequest = async (request) => {
     try {
-      // Llamar a la API para aceptar la solicitud, pasando providerId, request.id y token
       const result = await acceptEventRequest(user._id, request.id, token);
       if (result.success) {
-        // Actualizar el estado de las solicitudes
         setEventRequests((prevRequests) =>
           prevRequests.filter((r) => r.id !== request.id)  // Eliminar la solicitud aceptada
         );
@@ -54,12 +53,10 @@ export default function MiPerfilProvider() {
   // Función para manejar el rechazo de una solicitud
   const handleRejectRequest = async (request) => {
     try {
-      // Llamar a la API para rechazar la solicitud, pasando providerId, request.id y token
       const result = await rejectEventRequest(user._id, request.id, token);
       if (result.success) {
-        // Eliminar la solicitud rechazada
         setEventRequests((prevRequests) =>
-          prevRequests.filter((r) => r.id !== request.id)
+          prevRequests.filter((r) => r.id !== request.id)  // Eliminar la solicitud rechazada
         );
       }
     } catch (err) {
@@ -76,7 +73,6 @@ export default function MiPerfilProvider() {
   const handleSaveImage = async () => {
     if (!imageFile) return;
     try {
-      // Envía la imagen al servidor y actualiza el estado con la URL de la imagen
       const data = await uploadAvatar(user._id, token, imageFile);
       setProviderData(prev => ({ ...prev, imagenUrl: data.imagenUrl }));
       setImageFile(null);
@@ -116,13 +112,13 @@ export default function MiPerfilProvider() {
       <Row className="justify-content-center">
         <Col md={8} lg={6}>
           <ProfileCard
-            data={providerData}                    // Los datos del proveedor
-            nameField="nombre"                     // Campo para el nombre
-            emailField="correo"                    // Campo para el correo
-            imageField="imagenUrl"                 // Campo para la imagen
-            descriptionField="descripcion"         // Campo para la descripción
-            onImageChange={handleImageChange}      // Función que maneja la imagen
-            onSaveDescription={handleSaveDescription} // Función que maneja la descripción
+            data={providerData}                    
+            nameField="nombre"                     
+            emailField="correo"                    
+            imageField="imagenUrl"                 
+            descriptionField="descripcion"         
+            onImageChange={handleImageChange}      
+            onSaveDescription={handleSaveDescription} 
           />
 
           <div className="mt-4">
@@ -139,16 +135,16 @@ export default function MiPerfilProvider() {
 
           <div className="mt-4">
             <Calendar
-              providerId={user._id} // Pasa el ID del proveedor aquí como prop
-              weekendsVisible={providerData.weekendsVisible} // Si necesitas pasar más props
-              initialEvents={providerData.eventos} // O los eventos iniciales, si los tienes
+              providerId={user._id} 
+              weekendsVisible={providerData.weekendsVisible}
+              initialEvents={providerData.eventos}
             />
           </div>
         </Col>
 
         <Col md={4}>
           <EventRequestTable
-            eventRequests={eventRequests}
+            eventRequests={eventRequests}  // Pasa las solicitudes de eventos al componente de la tabla
             onAccept={handleAcceptRequest}
             onReject={handleRejectRequest}
           />
