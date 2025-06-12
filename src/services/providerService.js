@@ -53,13 +53,16 @@ export const uploadGalleryImage = async (id, token, file) => {
 };
 
 // Califica al proveedor
-export const rateProvider = async (id, token, rating) => {
+export const rateProvider = async (providerId, userId, token, rating) => {
   try {
+    console.log('Enviando solicitud para calificar:', { providerId, userId, rating });
+
     const res = await axios.post(
-      `${API_URL}/${id}/rate`,
-      { rating },
+      `http://localhost:4000/api/providers/${providerId}/valoracion`,
+      { proveedorId: providerId, clienteId: userId, calificacion: rating },
       { headers: { Authorization: `Bearer ${token}` } }
     );
+
     return res.data;
   } catch (error) {
     console.error('Error al calificar proveedor:', error);

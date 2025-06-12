@@ -26,6 +26,16 @@
   align-items: center;
   gap: 20px;
 }
+.perfil-valoracion {
+  width: 100%;
+  text-align: center;
+}
+
+.perfil-valoracion .estrellas {
+  font-size: 1.5rem;
+  color: #ffc107; /* color dorado para estrellas */
+}
+
 
 .perfil-foto img {
   width: 150px;

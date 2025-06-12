@@ -1,0 +1,31 @@
+/* styles/Valoracion.css */
+
+/* Ajustes opcionales para las estrellas */
+.btn-link {
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.bi-star,
+.bi-star-half,
+.bi-star-fill {
+  font-size: 2rem;
+}
+
+.bi-star:hover,
+.bi-star-half:hover,
+.bi-star-fill:hover {
+  color: #f8d105;  /* Color dorado cuando se pasa el ratón */
+}
+
+/* Estilo para el componente de valoraciones */
+.d-flex {
+  display: flex;
+  align-items: center;
+}
+
+.text-warning {
+  color: #f8d105;  /* Color dorado */
+}
