@@ -68,7 +68,7 @@ const handleAcceptRequest = async (request) => {
 const handleRejectRequest = async (request) => {
   try {
     // Llamar a la API para rechazar la solicitud
-    const result = await rejectEventRequest(user._id, request.id, token);
+    const result = await rejectEventRequest(user._id, request._id, token);
     if (result.success) {
       // Eliminar la solicitud rechazada de la tabla
       setEventRequests((prevRequests) =>

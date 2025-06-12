@@ -252,8 +252,8 @@ router.post('/:id/events/accept', authenticate, async (req, res) => {
 });
 
 
-
-router.post('events/reject', authenticate, async (req, res) => {
+//rechazar evento
+router.post('/:id/events/reject', authenticate, async (req, res) => {
   try {
     const { requestId } = req.body;  // ID de la solicitud de evento
     const proveedor = await Provider.findById(req.user.id); // Obtener al proveedor autenticado

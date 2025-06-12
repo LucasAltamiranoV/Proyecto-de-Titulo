@@ -151,19 +151,24 @@ export const acceptEventRequest = async (providerId, requestId, token) => {
   }
 };
 
-
 // Función para rechazar una solicitud de evento
 export const rejectEventRequest = async (providerId, requestId, token) => {
   try {
-    const response = await axios.get(`${API_URL}/${providerId}/events/reject`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await axios.post(
+      `${API_URL}/${providerId}/events/reject`,      
+      { requestId }, 
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
     return response.data;  // Devuelve el resultado del rechazo
   } catch (error) {
     console.error('Error al rechazar solicitud de evento', error);
     throw new Error('No se pudo rechazar la solicitud de evento');
   }
 };
+
 
 
 // Función para solicitar un evento
