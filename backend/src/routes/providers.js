@@ -101,7 +101,7 @@ router.get(
 );
 
 // ------------------------------------------------------------------
-// 4) PUT /api/providers/detalle/:id
+// 4) PUT /api/providers/:id
 //    Actualiza la descripción de un proveedor
 // ------------------------------------------------------------------
 // Actualizar descripción del proveedor autenticado
@@ -186,12 +186,12 @@ router.post('/:id/eventos', authenticate, async (req, res) => {
     }
 
     // Crear el evento y agregarlo al proveedor
-    const nuevoEvento = {
-      titulo,
-      inicio: new Date(inicio),
-      fin: new Date(fin),
-      todoElDia: todoElDia || false,
-    };
+      const nuevoEvento = {
+        titulo,
+        inicio: new Date(inicio).toISOString(),  // Asegúrate de que la fecha esté en UTC
+        fin: new Date(fin).toISOString(),        // Asegúrate de que la fecha esté en UTC
+        todoElDia: todoElDia || false,
+      };
 
     proveedor.eventos.push(nuevoEvento); // Agregar el evento al arreglo de eventos del proveedor
 
@@ -204,7 +204,8 @@ router.post('/:id/eventos', authenticate, async (req, res) => {
     res.status(500).json({ error: 'Error al agregar el evento' });
   }
 });
-// En tu archivo de rutas (por ejemplo, `providers.js` en el backend)
+
+// obtenemos los eventos de un proveedor por su ID
 router.get('/:id/events', authenticate, async (req, res) => {
   try {
     const proveedor = await Provider.findById(req.params.id); // Busca al proveedor por ID
@@ -216,6 +217,115 @@ router.get('/:id/events', authenticate, async (req, res) => {
   } catch (err) {
     console.error('Error al obtener eventos:', err);
     res.status(500).json({ error: 'Error al obtener eventos del proveedor' });
+  }
+});
+
+
+// ------------------------------------------------------------------
+// 2) POST events/accept
+//    Acepta una solicitud de evento
+// ------------------------------------------------------------------
+router.post('events/accept', authenticate, async (req, res) => {
+  try {
+    const { requestId } = req.body;  // ID de la solicitud de evento
+    const proveedor = await Provider.findById(req.user.id); // Obtener al proveedor autenticado
+
+    if (!proveedor) {
+      return res.status(404).json({ error: 'Proveedor no encontrado' });
+    }
+
+    // Encontrar la solicitud de evento
+    const requestIndex = proveedor.eventRequests.findIndex((request) => request.id === requestId);
+    if (requestIndex === -1) {
+      return res.status(404).json({ error: 'Solicitud de evento no encontrada' });
+    }
+
+    // Mover la solicitud aceptada a la lista de eventos
+    const acceptedRequest = proveedor.eventRequests.splice(requestIndex, 1)[0];  // Elimina la solicitud de la lista de solicitudes
+    proveedor.eventos.push(acceptedRequest);  // Agregarla a la lista de eventos del proveedor
+
+    await proveedor.save();  // Guardar los cambios en el proveedor
+
+    res.json({ success: 'Evento aceptado', eventos: proveedor.eventos });
+  } catch (error) {
+    console.error('Error al aceptar la solicitud de evento:', error);
+    res.status(500).json({ error: 'Error al aceptar la solicitud de evento' });
+  }
+});
+
+router.post('events/reject', authenticate, async (req, res) => {
+  try {
+    const { requestId } = req.body;  // ID de la solicitud de evento
+    const proveedor = await Provider.findById(req.user.id); // Obtener al proveedor autenticado
+
+    if (!proveedor) {
+      return res.status(404).json({ error: 'Proveedor no encontrado' });
+    }
+
+    // Encontrar la solicitud de evento
+    const requestIndex = proveedor.eventRequests.findIndex((request) => request.id === requestId);
+    if (requestIndex === -1) {
+      return res.status(404).json({ error: 'Solicitud de evento no encontrada' });
+    }
+
+    // Eliminar la solicitud de la lista de solicitudes del proveedor
+    proveedor.eventRequests.splice(requestIndex, 1);
+
+    await proveedor.save();  // Guardar los cambios en el proveedor
+
+    res.json({ success: 'Solicitud rechazada', eventRequests: proveedor.eventRequests });
+  } catch (error) {
+    console.error('Error al rechazar la solicitud de evento:', error);
+    res.status(500).json({ error: 'Error al rechazar la solicitud de evento' });
+  }
+});
+
+// Endpoint para obtener las solicitudes de eventos de un proveedor
+router.get('/:id/eventos/solicitudes', authenticate, async (req, res) => {
+  try {
+    const proveedor = await Provider.findById(req.params.id);
+    if (!proveedor) {
+      return res.status(404).json({ error: 'Proveedor no encontrado :(' });
+    }
+
+    // Obtener todas las solicitudes de eventos pendientes
+    const eventRequests = proveedor.eventRequests;
+    res.json(eventRequests);
+  } catch (error) {
+    console.error('Error al obtener las solicitudes de eventos', error);
+    res.status(500).json({ error: 'Error al obtener las solicitudes de eventos' });
+  }
+});
+
+// Endpoint para crear una solicitud de evento
+router.post('/eventos/solicitar', async (req, res) => {
+  try {
+    const { proveedorId, clienteId, clienteNombre, inicio, fin, todoElDia } = req.body;
+
+    const proveedor = await Provider.findById(proveedorId);
+    if (!proveedor) {
+      return res.status(404).json({ error: 'Proveedor no encontrado :/' });
+    }
+
+    // Crear la solicitud de evento
+    const eventRequest = {
+      titulo,
+      clienteId,
+      clienteNombre,
+      inicio: new Date(inicio), // Convierte la fecha de inicio a tipo Date
+      fin: new Date(fin),       // Convierte la fecha de fin a tipo Date
+      todoElDia: todoElDia || false,
+      status: 'pendiente',  // Inicialmente está pendiente
+    };
+
+    // Agregar la solicitud de evento en la lista de solicitudes del proveedor
+    proveedor.eventRequests.push(eventRequest);
+    await proveedor.save();
+
+    res.json({ success: 'Solicitud de evento realizada con éxito', eventRequest });
+  } catch (error) {
+    console.error('Error al solicitar evento', error);
+    res.status(500).json({ error: 'Error al solicitar evento' });
   }
 });
 

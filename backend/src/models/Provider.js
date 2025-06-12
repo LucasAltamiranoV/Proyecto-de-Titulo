@@ -16,6 +16,15 @@ const proveedorSchema = new mongoose.Schema({
     fin: { type: Date, required: true },
     todoElDia: { type: Boolean, default: false },
   }],
+    eventRequests: [{  // Solicitudes de eventos pendientes
+    titulo: { type: String, required: true },
+    inicio: { type: Date, required: true },
+    fin: { type: Date, required: true },
+    todoElDia: { type: Boolean, default: false },
+    clienteNombre: String,
+    clienteId: String,
+    status: { type: String, enum: ['pendiente', 'aceptado', 'rechazado'], default: 'pendiente' }
+  }]
 }, {
   timestamps: true
 });

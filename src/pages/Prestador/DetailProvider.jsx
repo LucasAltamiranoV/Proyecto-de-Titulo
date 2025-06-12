@@ -1,113 +1,146 @@
-import React, { useEffect, useState, useContext } from 'react';
-import { Container, Row, Col, Spinner, Button } from 'react-bootstrap';
+import React, { useState, useEffect, useContext } from 'react'; 
+import { useParams, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import Valoracion from '../../components/PrestadorServicio/Valoracion';
+import { FaMapMarkerAlt } from 'react-icons/fa';
 import { AuthContext } from '../../context/AuthContext';
-import ProfileCard from '../../components/ProfileCard';
 import Calendar from '../../components/PrestadorServicio/Calendar';
-import '../../styles/PageStyles/ProviderProfile.css';
-import { getProviderProfile, updateDescription, uploadAvatar } from '../../services/providerService';
 
-export default function MiPerfilProvider() {
-  const { user, token } = useContext(AuthContext);
-  const [providerData, setProviderData] = useState(null);
+function deriveModel(user) {
+  if (user.accountType) return user.accountType;
+  // si tiene servicios, lo consideramos Provider
+  if (Array.isArray(user.servicios)) return 'Provider';
+  return 'User';
+}
+
+export default function DetailProvider() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { user, token } = useContext(AuthContext); // Asegúrate de obtener correctamente el usuario desde AuthContext
+  const [provider, setProvider] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [imageFile, setImageFile] = useState(null);
 
-  // Carga inicial del perfil
+  // Determinar el tipo de cuenta del usuario (User, Provider, etc.)
+  const accountType = deriveModel(user);
+
+  // Carga inicial del perfil del proveedor
   useEffect(() => {
-    const fetchProfile = async () => {
-      if (!user?._id || user.accountType !== 'Provider') {
-        setLoading(false);
-        return;
-      }
-      setLoading(true);
-      try {
-        const data = await getProviderProfile(user._id, token);
-        setProviderData(data);
-      } catch (err) {
-        console.error('Error al obtener perfil:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProfile();
-  }, [user, token]);
+    setLoading(true);
+    axios
+      .get(`http://localhost:4000/api/providers/detalle/${id}`)
+      .then(res => setProvider(res.data))
+      .catch(err => console.error('Error al cargar proveedor:', err))
+      .finally(() => setLoading(false));
+  }, [id]);
 
-  // Guarda la nueva descripción
-  const handleSaveDescription = async (desc) => {
-    try {
-      const updated = await updateDescription(user._id, token, desc);
-      setProviderData(prev => ({ ...prev, descripcion: updated.descripcion }));
-    } catch (err) {
-      console.error('Error al actualizar descripción', err);
-    }
+  const handleChat = () => {
+    if (!user) return navigate('/login');
+    navigate('/inbox', {
+      state: {
+        contacto: {
+          contactoId: provider._id,
+          contactoModel: 'Provider',
+          nombre: provider.nombre,
+        },
+      },
+    });
   };
 
-  // Cuando seleccionan imagen en ProfileCard
-  const handleImageChange = (file) => setImageFile(file);
-
-  // Envía la imagen al servidor
-  const handleSaveImage = async () => {
-    if (!imageFile) return;
-    try {
-      const data = await uploadAvatar(user._id, token, imageFile);
-      setProviderData(prev => ({ ...prev, imagenUrl: data.imagenUrl }));
-      setImageFile(null);
-    } catch (err) {
-      console.error('Error al guardar la imagen', err);
+  // Función para solicitar un evento
+  const handleEventRequest = (start, end) => {
+    if (!user || !user.nombre) {
+      console.error("El usuario no está autenticado correctamente");
+      return;
     }
+    const eventRequest = {
+      proveedorId: provider._id,
+      clienteId: user._id,
+      clienteNombre: user.nombre,  // Asegúrate de que `user.nombre` esté disponible
+      inicio: start, // La fecha seleccionada
+      fin: end, // La fecha seleccionada
+      todoElDia: true,  // Puedes modificar esto dependiendo de la selección del cliente
+    };
   };
 
   if (loading) {
-    return (
-      <Container className="text-center my-5">
-        <Spinner animation="border" />
-      </Container>
-    );
+    return <div className="text-center my-5">Cargando proveedor...</div>;
   }
 
-  if (!providerData) {
-    return (
-      <Container className="text-center my-5">
-        <p>No se encontró al proveedor.</p>
-      </Container>
-    );
+  if (!provider) {
+    return <div className="text-center my-5">Proveedor no encontrado.</div>;
   }
 
   return (
-    <Container className="my-5">
-      <Row className="justify-content-center">
-        <Col md={8} lg={6}>
-          <ProfileCard
-            data={providerData}                    // Los datos del proveedor
-            nameField="nombre"                     // Campo para el nombre
-            emailField="correo"                    // Campo para el correo
-            imageField="imagenUrl"                 // Campo para la imagen
-            descriptionField="descripcion"         // Campo para la descripción
-            onImageChange={handleImageChange}      // Función que maneja la imagen
-            onSaveDescription={handleSaveDescription} // Función que maneja la descripción
-          />
+    <div className="container mt-5">
+      <div className="perfil-top d-flex flex-wrap">
+        <div className="perfil-columna me-4">
+          {provider.imagenUrl && (
+            <div className="perfil-foto">
+              <img src={provider.imagenUrl} alt="Foto del proveedor" />
+            </div>
+          )}
 
-          <div className="mt-4">
-            {/* Se añadió un espacio para el horario */}
+          <div className="mb-3">
+            <Valoracion valor={provider.calificacion} readOnly />
           </div>
 
-          <Button
-            className="button-save-changes mt-3"
-            onClick={handleSaveImage}
-            disabled={!imageFile}
-          >
-            Guardar Cambios
-          </Button>
-
-          <div className="mt-4">
-            <Calendar
-              providerId={user._id} // Pasa el ID del proveedor aquí como prop
-              weekendsVisible={providerData.weekendsVisible} // Si necesitas pasar más props
-              initialEvents={providerData.eventos} // O los eventos iniciales, si los tienes
-            />
+          <div className="perfil-ubicacion d-flex align-items-center mb-3">
+            <FaMapMarkerAlt className="me-2" />
+            <span>{provider.ciudad || 'Ubicación no disponible'}</span>
           </div>
-        </Col>
-      </Row>
-    </Container>
+
+          <button className="btn btn-primary" onClick={handleChat}>
+            Iniciar chat
+          </button>
+        </div>
+
+        <div className="perfil-lado-derecho flex-fill">
+          <h2 className="perfil-nombre">{provider.nombre}</h2>
+          <p className="perfil-oficio text-muted">
+            {Array.isArray(provider.servicios)
+              ? provider.servicios.join(', ')
+              : 'Servicios no disponibles'}
+          </p>
+          <p className="perfil-descripcion mt-3">
+            {provider.descripcion || 'El proveedor no ha añadido descripción.'}
+          </p>
+        </div>
+
+        <div className="perfil-galeria d-flex flex-wrap gap-2 mt-3">
+          {provider.galeria && provider.galeria.length > 0 ? (
+            provider.galeria.map((url, idx) => (
+              <div
+                key={idx}
+                className="galeria-imagen"
+                style={{ width: '100px', height: '100px' }}
+              >
+                <img
+                  src={url}
+                  alt={`Galería ${idx + 1}`}
+                  className="img-fluid rounded"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              </div>
+            ))
+          ) : (
+            <p className="text-muted">No hay fotos de galería.</p>
+          )}
+        </div>
+      </div>
+
+      <div className="mt-5">
+        <h5 className="mt-4">Agenda tu reserva</h5>
+        <Calendar
+          providerId={id}  // Pasa el ID del proveedor al calendario
+          weekendsVisible={provider.weekendsVisible}
+          initialEvents={provider.eventos}  // Pasa los eventos actuales del proveedor
+          accountType={accountType}  // Pasa el tipo de cuenta al calendario
+          onDateSelect={(selectInfo) => {
+            const { start, end } = selectInfo;
+            handleEventRequest(start, end); // Llama a la función para solicitar el evento
+          }}
+        />
+      </div>
+    </div>
   );
 }

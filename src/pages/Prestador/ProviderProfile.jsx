@@ -3,14 +3,17 @@ import { Container, Row, Col, Spinner, Button } from 'react-bootstrap';
 import { AuthContext } from '../../context/AuthContext';
 import ProfileCard from '../../components/ProfileCard';
 import Calendar from '../../components/PrestadorServicio/Calendar';
-import '../../styles/PageStyles/ProviderProfile.css';
-import { getProviderProfile, updateDescription, uploadAvatar } from '../../services/providerService';
+import EventRequestTable from '../../components/PrestadorServicio/EventRequestTable';  // Importa el componente de la tabla de solicitudes
+import { getProviderProfile } from '../../services/providerService';
+import { acceptEventRequest, rejectEventRequest,uploadAvatar, updateDescription } from '../../services/providerService';  // Asegúrate de tener estas funciones
+
 
 export default function MiPerfilProvider() {
   const { user, token } = useContext(AuthContext);
   const [providerData, setProviderData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [imageFile, setImageFile] = useState(null);
+  const [eventRequests, setEventRequests] = useState([]);  // Estado para almacenar las solicitudes de eventos
 
   // Carga inicial del perfil
   useEffect(() => {
@@ -32,28 +35,63 @@ export default function MiPerfilProvider() {
     fetchProfile();
   }, [user, token]);
 
-  // Guarda la nueva descripción
+  // Función para manejar la aceptación de una solicitud
+  const handleAcceptRequest = async (request) => {
+    try {
+      // Llamar a la API para aceptar la solicitud, pasando providerId, request.id y token
+      const result = await acceptEventRequest(user._id, request.id, token);
+      if (result.success) {
+        // Actualizar el estado de las solicitudes
+        setEventRequests((prevRequests) =>
+          prevRequests.filter((r) => r.id !== request.id)  // Eliminar la solicitud aceptada
+        );
+      }
+    } catch (err) {
+      console.error('Error al aceptar solicitud:', err);
+    }
+  };
+
+  // Función para manejar el rechazo de una solicitud
+  const handleRejectRequest = async (request) => {
+    try {
+      // Llamar a la API para rechazar la solicitud, pasando providerId, request.id y token
+      const result = await rejectEventRequest(user._id, request.id, token);
+      if (result.success) {
+        // Eliminar la solicitud rechazada
+        setEventRequests((prevRequests) =>
+          prevRequests.filter((r) => r.id !== request.id)
+        );
+      }
+    } catch (err) {
+      console.error('Error al rechazar solicitud:', err);
+    }
+  };
+
+  // Función para manejar el cambio de imagen
+  const handleImageChange = (file) => {
+    setImageFile(file);
+  };
+
+  // Función para guardar la imagen en el servidor
+  const handleSaveImage = async () => {
+    if (!imageFile) return;
+    try {
+      // Envía la imagen al servidor y actualiza el estado con la URL de la imagen
+      const data = await uploadAvatar(user._id, token, imageFile);
+      setProviderData(prev => ({ ...prev, imagenUrl: data.imagenUrl }));
+      setImageFile(null);
+    } catch (err) {
+      console.error('Error al guardar la imagen', err);
+    }
+  };
+
+  // Función para manejar la actualización de la descripción
   const handleSaveDescription = async (desc) => {
     try {
       const updated = await updateDescription(user._id, token, desc);
       setProviderData(prev => ({ ...prev, descripcion: updated.descripcion }));
     } catch (err) {
       console.error('Error al actualizar descripción', err);
-    }
-  };
-
-  // Cuando seleccionan imagen en ProfileCard
-  const handleImageChange = (file) => setImageFile(file);
-
-  // Envía la imagen al servidor
-  const handleSaveImage = async () => {
-    if (!imageFile) return;
-    try {
-      const data = await uploadAvatar(user._id, token, imageFile);
-      setProviderData(prev => ({ ...prev, imagenUrl: data.imagenUrl }));
-      setImageFile(null);
-    } catch (err) {
-      console.error('Error al guardar la imagen', err);
     }
   };
 
@@ -106,6 +144,14 @@ export default function MiPerfilProvider() {
               initialEvents={providerData.eventos} // O los eventos iniciales, si los tienes
             />
           </div>
+        </Col>
+
+        <Col md={4}>
+          <EventRequestTable
+            eventRequests={eventRequests}
+            onAccept={handleAcceptRequest}
+            onReject={handleRejectRequest}
+          />
         </Col>
       </Row>
     </Container>

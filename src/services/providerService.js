@@ -120,3 +120,78 @@ export const getProviderEvents = async (providerId, token) => {
     throw error;
   }
 };
+// Función para obtener las solicitudes de eventos
+export const getEventRequests = async ( providerId, token) => {
+  try {
+    const response = await axios.get(`${API_URL}/${providerId}/events`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;  // Devuelve las solicitudes de eventos
+  } catch (error) {
+    console.error('Error al obtener solicitudes de eventos', error);
+    throw new Error('No se pudieron obtener las solicitudes de eventos');
+  }
+};
+
+// Función para aceptar una solicitud de evento
+export const acceptEventRequest = async (providerId, requestId, token) => {
+  try {
+    const response = await axios.get(`${API_URL}/${providerId}/events/accept`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;  // Devuelve el resultado de la aceptación
+  } catch (error) {
+    console.error('Error al aceptar solicitud de evento', error);
+    throw new Error('No se pudo aceptar la solicitud de evento');
+  }
+};
+
+// Función para rechazar una solicitud de evento
+export const rejectEventRequest = async (providerId, requestId, token) => {
+  try {
+    const response = await axios.get(`${API_URL}/${providerId}/events/reject`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;  // Devuelve el resultado del rechazo
+  } catch (error) {
+    console.error('Error al rechazar solicitud de evento', error);
+    throw new Error('No se pudo rechazar la solicitud de evento');
+  }
+};
+
+
+// Función para solicitar un evento
+export const solicitarEvento = async (titulo, clienteId, clienteNombre, inicio, fin, todoElDia) => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/eventos/solicitar`,
+      {
+        titulo,
+        clienteId,
+        clienteNombre,
+        inicio,
+        fin,
+        todoElDia,
+      }
+    );
+
+    return response.data;  // Devuelve el resultado de la solicitud
+  } catch (error) {
+    console.error('Error al solicitar evento', error);
+    throw new Error('No se pudo solicitar el evento');
+  }
+};
+
+
+// Función para obtener las solicitudes de eventos del proveedor
+export const getProviderEventRequests = async (providerId, token) => {
+  try {
+    const response = await axios.get(`${API_URL}/${providerId}/eventos/solicitudes`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data; // Devuelve las solicitudes de eventos
+  } catch (error) {
+    console.error('Error al obtener las solicitudes de eventos', error);
+    throw new Error('No se pudieron obtener las solicitudes de eventos');
+  }
+};
