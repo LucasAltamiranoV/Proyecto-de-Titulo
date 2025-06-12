@@ -132,19 +132,25 @@ export const getEventRequests = async ( providerId, token) => {
     throw new Error('No se pudieron obtener las solicitudes de eventos');
   }
 };
-
 // Función para aceptar una solicitud de evento
 export const acceptEventRequest = async (providerId, requestId, token) => {
   try {
-    const response = await axios.get(`${API_URL}/${providerId}/events/accept`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await axios.post(
+      `${API_URL}/${providerId}/events/accept`,
+      { requestId },  // Pasa el requestId en el cuerpo de la solicitud
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,  // Agregar el token de autenticación aquí
+        },
+      }
+    );
     return response.data;  // Devuelve el resultado de la aceptación
   } catch (error) {
     console.error('Error al aceptar solicitud de evento', error);
     throw new Error('No se pudo aceptar la solicitud de evento');
   }
 };
+
 
 // Función para rechazar una solicitud de evento
 export const rejectEventRequest = async (providerId, requestId, token) => {

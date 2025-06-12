@@ -221,31 +221,24 @@ router.get('/:id/events', authenticate, async (req, res) => {
   }
 });
 
-
-// ------------------------------------------------------------------
-// 2) POST events/accept
-//    Acepta una solicitud de evento
-// ------------------------------------------------------------------
-router.post('events/accept', authenticate, async (req, res) => {
+// Endpoint para aceptar una solicitud de evento
+// Endpoint para aceptar una solicitud de evento
+router.post('/:id/events/accept', authenticate, async (req, res) => {
   try {
-    const { requestId } = req.body;  // ID de la solicitud de evento
+    const { requestId } = req.body;  // Este es el `requestId` que recibes del frontend
+
     const proveedor = await Provider.findById(req.user.id); // Obtener al proveedor autenticado
 
     if (!proveedor) {
       return res.status(404).json({ error: 'Proveedor no encontrado' });
     }
 
-    // Encontrar la solicitud de evento
-    const requestIndex = proveedor.eventRequests.findIndex((request) => request.id === requestId);
+    // Usar el _id de MongoDB (requestId debería ser el _id de la solicitud de evento)
+    const requestIndex = proveedor.eventRequests.findIndex((request) => request._id.toString() === requestId);
     if (requestIndex === -1) {
       return res.status(404).json({ error: 'Solicitud de evento no encontrada' });
     }
 
-    // Mover la solicitud aceptada a la lista de eventos
-    const acceptedRequest = proveedor.eventRequests.splice(requestIndex, 1)[0];  // Elimina la solicitud de la lista de solicitudes
-    proveedor.eventos.push(acceptedRequest);  // Agregarla a la lista de eventos del proveedor
-
-    await proveedor.save();  // Guardar los cambios en el proveedor
 
     res.json({ success: 'Evento aceptado', eventos: proveedor.eventos });
   } catch (error) {
@@ -253,6 +246,8 @@ router.post('events/accept', authenticate, async (req, res) => {
     res.status(500).json({ error: 'Error al aceptar la solicitud de evento' });
   }
 });
+
+
 
 router.post('events/reject', authenticate, async (req, res) => {
   try {
