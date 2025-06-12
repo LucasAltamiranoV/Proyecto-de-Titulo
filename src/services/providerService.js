@@ -80,31 +80,22 @@ export const updateDescription = async (id, token, descripcion) => {
     throw new Error('No se pudo actualizar la descripción del proveedor');
   }
 };
+// Función para agregar un evento
+export async function agregarEvento(id, evento, token) {
+  const response = await fetch(`${API_URL}/${id}/eventos`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`, // Pasamos el token correctamente
+    },
+    body: JSON.stringify(evento),
+  });
 
-// Actualiza el estado de la reserva (aceptar o rechazar)
-export const updateReservationStatus = async (reservationId, status, token) => {
-  try {
-    const res = await axios.put(
-      `http://localhost:4000/api/reservations/${reservationId}/status`,
-      { status },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    return res.data;
-  } catch (error) {
-    console.error('Error al actualizar estado de la reserva:', error);
-    throw new Error('No se pudo actualizar el estado de la reserva');
-  }
-};
+  const data = await response.json();
 
-// Función para obtener las reservas de un proveedor
-export const getProviderReservations = async (providerId, token) => {
-  try {
-    const res = await axios.get(`${API_URL}/${providerId}/reservations`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    return res.data;
-  } catch (error) {
-    console.error('Error al obtener reservas del proveedor:', error);
-    throw new Error('No se pudieron obtener las reservas del proveedor');
+  if (response.ok) {
+    console.log('Evento agregado exitosamente:', data);
+  } else {
+    console.error('Error al agregar evento:', data.error);
   }
-};
+}

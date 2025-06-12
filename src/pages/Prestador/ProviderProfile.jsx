@@ -2,22 +2,15 @@ import React, { useEffect, useState, useContext } from 'react';
 import { Container, Row, Col, Spinner, Button } from 'react-bootstrap';
 import { AuthContext } from '../../context/AuthContext';
 import ProfileCard from '../../components/ProfileCard';
-import BookingCalendar from '../../components/PrestadorServicio/BookingCalendar';
-import {
-  getProviderProfile,
-  uploadAvatar,
-  updateDescription,
-  getProviderReservations,
-  updateReservationStatus
-} from '../../services/providerService';
+import Calendar from '../../components/PrestadorServicio/Calendar';
 import '../../styles/PageStyles/ProviderProfile.css';
+import { getProviderProfile, updateDescription, uploadAvatar } from '../../services/providerService';
 
 export default function MiPerfilProvider() {
   const { user, token } = useContext(AuthContext);
   const [providerData, setProviderData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [imageFile, setImageFile] = useState(null);
-  const [reservations, setReservations] = useState([]);
 
   // Carga inicial del perfil
   useEffect(() => {
@@ -37,21 +30,6 @@ export default function MiPerfilProvider() {
       }
     };
     fetchProfile();
-  }, [user, token]);
-
-  // Cargar las reservas pendientes
-  useEffect(() => {
-    const fetchReservations = async () => {
-      if (!user?._id) return;
-      try {
-        const data = await getProviderReservations(user._id, token);
-        console.log("Reservas obtenidas:", data); // Añadido para depuración
-        setReservations(data);
-      } catch (err) {
-        console.error('Error al obtener reservas:', err);
-      }
-    };
-    fetchReservations();
   }, [user, token]);
 
   // Guarda la nueva descripción
@@ -76,30 +54,6 @@ export default function MiPerfilProvider() {
       setImageFile(null);
     } catch (err) {
       console.error('Error al guardar la imagen', err);
-    }
-  };
-
-  // Confirmar reserva
-  const handleConfirmReservation = async (reservationId) => {
-    try {
-      await updateReservationStatus(reservationId, 'accepted', token);
-      setReservations(prev => prev.map(res =>
-        res._id === reservationId ? { ...res, status: 'accepted' } : res
-      ));
-    } catch (err) {
-      console.error('Error al confirmar reserva:', err);
-    }
-  };
-
-  // Rechazar reserva
-  const handleRejectReservation = async (reservationId) => {
-    try {
-      await updateReservationStatus(reservationId, 'rejected', token);
-      setReservations(prev => prev.map(res =>
-        res._id === reservationId ? { ...res, status: 'rejected' } : res
-      ));
-    } catch (err) {
-      console.error('Error al rechazar reserva:', err);
     }
   };
 
@@ -146,13 +100,10 @@ export default function MiPerfilProvider() {
           </Button>
 
           <div className="mt-4">
-            <BookingCalendar
-              events={reservations.filter(r => r.status === 'pending')} // Solo las reservas pendientes
-              onSelect={(info) => {
-                alert(`Reserva solicitada para esta hora: ${info.startStr}`);
-              }} // Acción para mostrar la hora seleccionada
-              onConfirmReservation={handleConfirmReservation} // Función para confirmar
-              onRejectReservation={handleRejectReservation} // Función para rechazar
+            <Calendar
+              providerId={user._id} // Pasa el ID del proveedor aquí como prop
+              weekendsVisible={providerData.weekendsVisible} // Si necesitas pasar más props
+              initialEvents={providerData.eventos} // O los eventos iniciales, si los tienes
             />
           </div>
         </Col>

@@ -23,7 +23,6 @@ const authRoutes = require('./routes/auth');
 const providerRoutes = require('./routes/providers');
 const UserRoutes = require('./routes/users');
 const chatRoutes = require('./routes/chat');
-const reservationRoutes = require('./routes/reservations');
 
 // para que /uploads/archivo.png sirva la imagen
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -31,7 +30,6 @@ app.use('/api/auth', authRoutes);
 app.use('/api/providers', providerRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/users', UserRoutes);  
-app.use('/api/reservations', reservationRoutes);
 
 app.get('/', (req, res) => res.send('Servidor backend corriendo'));
 

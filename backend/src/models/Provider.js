@@ -10,15 +10,12 @@ const proveedorSchema = new mongoose.Schema({
   calificacion: { type: Number, min: 0, max: 5, default: 0 },
   descripcion: { type: String },
   galeria: { type: [String], default: [] }, // URLs de imágenes
-  disponibilidad: {
-    domingo: { type: [String], default: [] },
-    lunes: { type: [String], default: [] },
-    martes: { type: [String], default: [] },
-    miercoles: { type: [String], default: [] },
-    jueves: { type: [String], default: [] },
-    viernes: { type: [String], default: [] },
-    sabado: { type: [String], default: [] },
-  },
+  eventos: [{  // Este es el nuevo campo que añadimos
+    titulo: { type: String, required: true },
+    inicio: { type: Date, required: true },
+    fin: { type: Date, required: true },
+    todoElDia: { type: Boolean, default: false },
+  }],
 }, {
   timestamps: true
 });

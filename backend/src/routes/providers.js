@@ -6,7 +6,6 @@ const multer  = require('multer');
 const path    = require('path');
 const fs      = require('fs');
 const Provider = require('../models/Provider');
-const Reservation = require('../models/Reservation');
 const router = express.Router();
 
 // ------------------------------------------------------------------
@@ -100,94 +99,6 @@ router.get(
     }
   }
 );
-// ------------------------------------------------------------------
-// Endpoint para obtener las reservas de un proveedor
-// ------------------------------------------------------------------
-router.get('/:id/reservations', async (req, res) => {
-  try {
-    const filter = { provider: req.params.id };  // Filtra por ID de proveedor
-    if (req.query.status) filter.status = req.query.status; // Filtrar por estado (aceptada, pendiente, rechazada)
-    
-    // Filtrar por fecha si se recibe un rango de fechas en los parámetros de la consulta
-    if (req.query.startDate && req.query.endDate) {
-      filter.startTime = { $gte: new Date(req.query.startDate), $lte: new Date(req.query.endDate) };
-    }
-
-    const reservas = await Reservation.find(filter)
-      .populate('user', 'nombre correo')  // Opcional: para obtener datos del usuario que hizo la reserva
-      .sort({ startTime: 1 });  // Ordenar por `startTime` (hora de inicio)
-
-    res.json(reservas);
-  } catch (err) {
-    console.error('Error al obtener reservas:', err);
-    res.status(500).json({ error: 'Error al obtener reservas' });
-  }
-});
-
-// ------------------------------------------------------------------
-// Nuevo endpoint: PUT /api/providers/reservations/:id/status
-// Actualiza el estado de una reserva (aceptar/rechazar)
-// ------------------------------------------------------------------
-router.put('/reservations/:id/status', authenticate, async (req, res) => {
-  const { status } = req.body; // 'accepted' o 'rejected'
-  if (!['accepted', 'rejected'].includes(status)) {
-    return res.status(400).json({ error: 'Estado inválido' });
-  }
-
-  try {
-    const reservation = await Reservation.findById(req.params.id);
-    if (!reservation) return res.status(404).json({ error: 'Reserva no encontrada' });
-
-    // Solo el proveedor dueño de la reserva puede actualizar el estado
-    if (reservation.provider.toString() !== req.user.id) {
-      return res.status(403).json({ error: 'No autorizado' });
-    }
-
-    // Verificar si el estado es 'accepted' y que el horario esté disponible
-    if (status === 'accepted') {
-      const provider = await Provider.findById(reservation.provider);
-      const day = days[new Date(reservation.startTime).getDay()]; // Usamos startTime para obtener el día
-
-      // Verificar si el horario aún está disponible (comparar las horas con la disponibilidad del proveedor)
-      const isTimeAvailable = provider.disponibilidad[day]?.some(
-        (availableSlot) => {
-          // Comparamos si el evento se cruza con la disponibilidad del proveedor
-          const [availableStart, availableEnd] = availableSlot.split('-');
-          const timeStart = new Date(`${reservation.date}T${availableStart}:00`);
-          const timeEnd = new Date(`${reservation.date}T${availableEnd}:00`);
-
-          // Verificamos que el evento no se cruce con la disponibilidad
-          return reservation.startTime >= timeStart && reservation.endTime <= timeEnd;
-        }
-      );
-
-      if (!isTimeAvailable) {
-        return res.status(400).json({ error: 'Horario ya no disponible' });
-      }
-
-      // Eliminar la disponibilidad del proveedor para ese horario
-      provider.disponibilidad[day] = provider.disponibilidad[day].filter(
-        (availableSlot) => {
-          const [availableStart, availableEnd] = availableSlot.split('-');
-          const timeStart = new Date(`${reservation.date}T${availableStart}:00`);
-          const timeEnd = new Date(`${reservation.date}T${availableEnd}:00`);
-          return !(reservation.startTime >= timeStart && reservation.endTime <= timeEnd);
-        }
-      );
-      await provider.save();
-    }
-
-    // Actualizar el estado de la reserva
-    reservation.status = status;
-    await reservation.save();
-
-    res.status(200).json(reservation); // Responder con la reserva actualizada
-  } catch (err) {
-    console.error('Error al actualizar estado de la reserva:', err);
-    res.status(500).json({ error: 'Error al actualizar estado de la reserva' });
-  }
-});
-
 
 // ------------------------------------------------------------------
 // 4) PUT /api/providers/detalle/:id
@@ -250,25 +161,48 @@ router.post('/:id/gallery', authenticate, upload.single('imagen'), async (req, r
 });
 
 // ------------------------------------------------------------------
-// POST /api/providers/:id/rate
-//    Califica al proveedor
+// 6) POST /api/providers/:id/eventos
+//    Agrega un evento al proveedor
 // ------------------------------------------------------------------
-router.post('/:id/rate', authenticate, async (req, res) => {
+router.post('/:id/eventos', authenticate, async (req, res) => {
   try {
-    const { rating } = req.body;
-    if (typeof rating !== 'number' || rating < 0 || rating > 5) {
-      return res.status(400).json({ error: 'Calificación inválida' });
+    // Verificar si el proveedor existe
+    const proveedor = await Provider.findById(req.params.id);
+    if (!proveedor) {
+      return res.status(404).json({ error: 'Proveedor no encontrado' });
     }
-    const provider = await Provider.findById(req.params.id);
-    if (!provider) return res.status(404).json({ error: 'Proveedor no encontrado' });
-    provider.calificacion = rating;
-    await provider.save();
-    res.json({ calificacion: provider.calificacion });
-  } catch (err) {
-    console.error('Error al calificar proveedor:', err);
-    res.status(500).json({ error: 'Error al calificar proveedor' });
+
+    // Verificar que el proveedor sea el mismo que está haciendo la solicitud
+    if (req.user.id !== proveedor.id) {
+      return res.status(403).json({ error: 'No autorizado a modificar este proveedor' });
+    }
+
+    // Crear el nuevo evento a partir de los datos enviados en el cuerpo de la solicitud
+    const { titulo, inicio, fin, todoElDia } = req.body;
+
+    // Validar la entrada de datos
+    if (!titulo || !inicio || !fin) {
+      return res.status(400).json({ error: 'Faltan datos necesarios para crear el evento' });
+    }
+
+    // Crear el evento y agregarlo al proveedor
+    const nuevoEvento = {
+      titulo,
+      inicio: new Date(inicio),
+      fin: new Date(fin),
+      todoElDia: todoElDia || false,
+    };
+
+    proveedor.eventos.push(nuevoEvento); // Agregar el evento al arreglo de eventos del proveedor
+
+    // Guardar el proveedor con el nuevo evento
+    await proveedor.save();
+
+    res.status(200).json({ success: 'Evento agregado con éxito', eventos: proveedor.eventos });
+  } catch (error) {
+    console.error('Error al agregar el evento:', error);
+    res.status(500).json({ error: 'Error al agregar el evento' });
   }
 });
-
 
 module.exports = router;
