@@ -1,5 +1,6 @@
 // src/routes/providers.js
 
+const mongoose = require('mongoose');
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const multer  = require('multer');
@@ -300,8 +301,21 @@ router.get('/:id/eventos/solicitudes', authenticate, async (req, res) => {
 // Endpoint para crear una solicitud de evento
 router.post('/eventos/solicitar', async (req, res) => {
   try {
-    const { proveedorId, clienteId, clienteNombre, inicio, fin, todoElDia } = req.body;
+    const { titulo, proveedorId, clienteId, clienteNombre, inicio, fin, todoElDia } = req.body;
 
+    
+    console.log('Datos recibidos:', {
+      titulo,
+      proveedorId,
+      clienteId,
+      clienteNombre,
+      inicio,
+      fin,
+      todoElDia
+    });
+  
+
+    // Buscar al proveedor en la base de datos
     const proveedor = await Provider.findById(proveedorId);
     if (!proveedor) {
       return res.status(404).json({ error: 'Proveedor no encontrado :/' });
@@ -325,7 +339,7 @@ router.post('/eventos/solicitar', async (req, res) => {
     res.json({ success: 'Solicitud de evento realizada con éxito', eventRequest });
   } catch (error) {
     console.error('Error al solicitar evento', error);
-    res.status(500).json({ error: 'Error al solicitar evento' });
+    res.status(500).json({ error: 'Error al solicitar evento', details: error.message });
   }
 });
 

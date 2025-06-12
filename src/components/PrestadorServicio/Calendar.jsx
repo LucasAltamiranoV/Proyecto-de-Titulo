@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react'; 
+import React, { useState, useEffect,useContext } from 'react'; 
+
+import { AuthContext } from '../../context/AuthContext';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -8,6 +10,11 @@ import { agregarEvento, getProviderEvents, getProviderEventRequests,solicitarEve
 export default function Calendar(props) {
   const [currentEvents, setCurrentEvents] = useState([]);  // Eventos aprobados
   const [eventRequests, setEventRequests] = useState([]);  // Solicitudes de eventos
+  const { user } = useContext(AuthContext);
+  const clienteId = user?._id;  // Asumiendo que 'id' es el clienteId
+const clienteNombre = user?.nombre;  // Asumiendo que 'nombre' es el clienteNombre
+const accountType = user?.accountType || 'User'; // Usamos 'User' como valor por defecto si no existe accountType
+
   const { providerId } = props;
 
   // Recuperar los eventos y solicitudes de eventos del proveedor cuando el componente se monte
@@ -45,11 +52,11 @@ export default function Calendar(props) {
   }, [providerId]);  // Se ejecuta cuando cambia el `providerId`
 
   // Esta función maneja la creación de un nuevo evento cuando se selecciona una fecha
-  const handleDateSelect = async (selectInfo) => {
-    let title = prompt('Por favor ingresa el título de tu evento');
+const handleDateSelect = async (selectInfo) => {
+  let title = prompt('Por favor ingresa el título de tu evento');
 
-    if (title) {
-          // Crea un evento con los datos proporcionados
+  if (title) {
+    // Crea un evento con los datos proporcionados
     const newEvent = {
       titulo: title,
       inicio: selectInfo.start.toISOString(), // Convierte la fecha a formato ISO
@@ -57,30 +64,39 @@ export default function Calendar(props) {
       todoElDia: selectInfo.allDay,          // Si es todo el día o no
     };
 
+    try {
+      const token = localStorage.getItem('token'); // O recupera el token de otra manera
 
-      try {
-        // Llama a la API para agregar el evento
-        const token = localStorage.getItem('token'); // O recupera el token de otra manera
+      // Verifica el tipo de cuenta y llama a la función correspondiente
+      if (accountType === 'User') {
+        // Si el accountType es 'User', llama a la función solicitarEvento
+           await solicitarEvento(providerId, newEvent.titulo, clienteId, clienteNombre, newEvent.inicio, newEvent.fin, newEvent.todoElDia);
+
+        alert('Solicitud creada con éxito');
+      } else {
+        // Si el accountType no es 'User', llama a la función agregarEvento
         await agregarEvento(providerId, newEvent, token);
-
-        // Si la llamada fue exitosa, actualiza los eventos en el estado
-        setCurrentEvents((prevEvents) => [
-          ...prevEvents,
-          {
-            title: newEvent.titulo,
-            start: newEvent.inicio,
-            end: newEvent.fin,
-            allDay: newEvent.todoElDia,
-            backgroundColor: 'green', // Color para los eventos agregados por el proveedor
-          },
-        ]);
         alert('Evento agregado con éxito');
-      } catch (error) {
-        console.error('Error al agregar el evento:', error);
-        alert('Hubo un problema al agregar el evento');
       }
+
+      // Si la llamada fue exitosa, actualiza los eventos en el estado
+      setCurrentEvents((prevEvents) => [
+        ...prevEvents,
+        {
+          title: newEvent.titulo,
+          start: newEvent.inicio,
+          end: newEvent.fin,
+          allDay: newEvent.todoElDia,
+          backgroundColor: 'green', // Color para los eventos agregados por el proveedor
+        },
+      ]);
+    } catch (error) {
+      console.error('Error al agregar el evento o solicitud:', error);
+      alert('Hubo un problema al agregar el evento o la solicitud');
     }
-  };
+  }
+};
+
 
   return (
     <FullCalendar

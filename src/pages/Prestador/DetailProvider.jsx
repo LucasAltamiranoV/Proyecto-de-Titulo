@@ -16,7 +16,7 @@ function deriveModel(user) {
 export default function DetailProvider() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user, token } = useContext(AuthContext); // Asegúrate de obtener correctamente el usuario desde AuthContext
+  const { user, token } = useContext(AuthContext); // obtener correctamente el usuario desde AuthContext
   const [provider, setProvider] = useState(null);
   const [loading, setLoading] = useState(true);
 
