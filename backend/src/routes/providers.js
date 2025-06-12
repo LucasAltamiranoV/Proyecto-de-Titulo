@@ -239,6 +239,10 @@ router.post('/:id/events/accept', authenticate, async (req, res) => {
       return res.status(404).json({ error: 'Solicitud de evento no encontrada' });
     }
 
+    // Mover la solicitud aceptada a la lista de eventos
+    proveedor.eventRequests.splice(requestIndex, 1)[0];  // Elimina la solicitud de la lista de solicitudes
+    
+    await proveedor.save();  // Guardar los cambios en el proveedor
 
     res.json({ success: 'Evento aceptado', eventos: proveedor.eventos });
   } catch (error) {
