@@ -5,6 +5,7 @@ import logo from '../assets/Logo2.png';
 import ImageDropdown from './ImageDropdown'; // 👈 importa tu dropdown
 import { AuthContext } from '../context/AuthContext'; // Importa el contexto
 
+//navbar predeterminado para usuarios logueados
 
 function NavbarLogOut() {
 
@@ -15,7 +16,7 @@ function NavbarLogOut() {
       <div className="container-fluid position-relative d-flex justify-content-between align-items-center">
 
         {/* Logo centrado */}
-        <Link to="/" className="navbar-brand logo-centered">
+        <Link to="/home" className="navbar-brand logo-centered">
           <img src={logo} alt="Logo" className="logo-navbar" />
         </Link>
 

@@ -43,8 +43,8 @@ function App() {
         <main>
           <Routes>
             {/* Rutas generales */}
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<LoginPageWrapper />} />
+            <Route path="/" element={<LoginPageWrapper/>} />
+            <Route path="/home" element={<Home />} />
             <Route path="/search" element={<SearchServices />} />
             <Route path="/soporte" element={<Soporte />} />
             <Route path="/reporte-enviado" element={<ConfirmacionSoporte />} />

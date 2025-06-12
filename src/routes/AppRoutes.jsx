@@ -1,11 +1,11 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import Home from '../pages/Home'; 
+import LoginPageWrapper from  '../pages/All/LoginPageWrapper'
 
 function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
+      <Route path="/" element={<LoginPageWrapper />} />
     </Routes>
   );
 }

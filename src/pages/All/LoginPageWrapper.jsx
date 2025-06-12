@@ -19,7 +19,7 @@ export default function LoginPageWrapper() {
     console.log('handleLogin ejecutado con:', credentials);  // aquí debe ir
     try {
       await login(credentials);
-      navigate('/');  
+      navigate('/home');  
     } catch (e) {
       setError(e.error || 'Error al iniciar sesión');
     }

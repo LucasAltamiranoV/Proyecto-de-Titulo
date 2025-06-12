@@ -29,7 +29,7 @@ const ImageDropdown = () => {
 
     if (item.type === 'logout') {
       logout();
-      return navigate('/login');
+      return navigate('/');
     }
 
     if (item.type === 'perfil') {
