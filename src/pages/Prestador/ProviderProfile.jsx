@@ -1,11 +1,10 @@
-import React, { useEffect, useState, useContext } from 'react'; 
+import React, { useEffect, useState, useContext } from 'react';  
 import { Container, Row, Col, Spinner, Button } from 'react-bootstrap';
 import { AuthContext } from '../../context/AuthContext';
 import ProfileCard from '../../components/ProfileCard';
 import Calendar from '../../components/PrestadorServicio/Calendar';
 import EventRequestTable from '../../components/PrestadorServicio/EventRequestTable';
 import { getProviderProfile, getProviderEventRequests, acceptEventRequest, rejectEventRequest, uploadAvatar, updateDescription, agregarEvento } from '../../services/providerService'; 
-
 
 export default function MiPerfilProvider() {
   const { user, token } = useContext(AuthContext);
@@ -38,48 +37,45 @@ export default function MiPerfilProvider() {
   }, [user, token]);
 
   // Función para manejar la aceptación de una solicitud
-const handleAcceptRequest = async (request) => {
-  try {
-    // Llamar a la API para aceptar la solicitud
-    const result = await acceptEventRequest(user._id, request._id, token);
-    if (result.success) {
-      // Crear el evento con los detalles de la solicitud
-      const newEvent = {
-        titulo: request.titulo,
-        inicio: request.inicio,  // Asumiendo que las fechas están en formato ISO
-        fin: request.fin,
-        todoElDia: request.todoElDia,
-      };
+  const handleAcceptRequest = async (request) => {
+    try {
+      const result = await acceptEventRequest(user._id, request._id, token);
+      if (result.success) {
+        // Crear el evento con los detalles de la solicitud
+        const newEvent = {
+          titulo: request.titulo,
+          inicio: request.inicio,  // Asumiendo que las fechas están en formato ISO
+          fin: request.fin,
+          todoElDia: request.todoElDia,
+        };
 
-      // Llamar a la función para agregar el evento al calendario
-      await agregarEvento(user._id, newEvent, token);
+        // Llamar a la función para agregar el evento al calendario
+        await agregarEvento(user._id, newEvent, token);
 
-      // Eliminar la solicitud aceptada de la tabla
-      setEventRequests((prevRequests) =>
-        prevRequests.filter((r) => r.id !== request.id)  // Eliminar la solicitud aceptada
-      );
+        // Eliminar la solicitud aceptada de la tabla
+        setEventRequests((prevRequests) =>
+          prevRequests.filter((r) => r.id !== request.id)  // Eliminar la solicitud aceptada
+        );
+      }
+    } catch (err) {
+      console.error('Error al aceptar solicitud:', err);
     }
-  } catch (err) {
-    console.error('Error al aceptar solicitud:', err);
-  }
-};
+  };
 
   // Función para manejar el rechazo de una solicitud
-const handleRejectRequest = async (request) => {
-  try {
-    // Llamar a la API para rechazar la solicitud
-    const result = await rejectEventRequest(user._id, request._id, token);
-    if (result.success) {
-      // Eliminar la solicitud rechazada de la tabla
-      setEventRequests((prevRequests) =>
-        prevRequests.filter((r) => r.id !== request.id)  // Eliminar la solicitud rechazada
-      );
+  const handleRejectRequest = async (request) => {
+    try {
+      const result = await rejectEventRequest(user._id, request._id, token);
+      if (result.success) {
+        // Eliminar la solicitud rechazada de la tabla
+        setEventRequests((prevRequests) =>
+          prevRequests.filter((r) => r.id !== request.id)  // Eliminar la solicitud rechazada
+        );
+      }
+    } catch (err) {
+      console.error('Error al rechazar solicitud:', err);
     }
-  } catch (err) {
-    console.error('Error al rechazar solicitud:', err);
-  }
-};
-
+  };
 
   // Función para manejar el cambio de imagen
   const handleImageChange = (file) => {
@@ -139,7 +135,7 @@ const handleRejectRequest = async (request) => {
           />
 
           <div className="mt-4">
-            {/* Se añadió un espacio para el horario */}
+            {/* Espacio añadido para la descripción del proveedor */}
           </div>
 
           <Button
@@ -158,8 +154,11 @@ const handleRejectRequest = async (request) => {
             />
           </div>
         </Col>
+      </Row>
 
-        <Col md={4}>
+      {/* Movemos la tabla de solicitudes debajo del calendario */}
+      <Row className="mt-4">
+        <Col md={12}>
           <EventRequestTable
             eventRequests={eventRequests}  // Pasa las solicitudes de eventos al componente de la tabla
             onAccept={handleAcceptRequest}
