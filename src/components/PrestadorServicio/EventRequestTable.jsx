@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'; 
 import { Table, Button } from 'react-bootstrap';
 
 const EventRequestTable = ({ eventRequests, onAccept, onReject }) => {
@@ -8,6 +8,7 @@ const EventRequestTable = ({ eventRequests, onAccept, onReject }) => {
       <Table striped bordered hover>
         <thead>
           <tr>
+            <th>Título</th>               {/* Nueva columna */}
             <th>Cliente</th>
             <th>Fecha de Solicitud</th>
             <th>Acción</th>
@@ -16,32 +17,41 @@ const EventRequestTable = ({ eventRequests, onAccept, onReject }) => {
         <tbody>
           {eventRequests.length === 0 ? (
             <tr>
-              <td colSpan="3" className="text-center">No hay solicitudes pendientes</td>
+              <td colSpan="4" className="text-center">
+                No hay solicitudes pendientes
+              </td>
             </tr>
           ) : (
             eventRequests.map((request, index) => {
-              // Verificamos si la fecha es válida antes de mostrarla
               const startDate = new Date(request.inicio);
-              const endDate = new Date(request.fin);
+              const endDate   = new Date(request.fin);
 
-              // Si las fechas son válidas
-              const formattedStartDate = startDate instanceof Date && !isNaN(startDate) 
-                ? startDate.toLocaleDateString() + ' ' + startDate.toLocaleTimeString() 
+              const formattedStartDate = !isNaN(startDate)
+                ? startDate.toLocaleDateString() + ' ' + startDate.toLocaleTimeString()
                 : 'Fecha inválida';
 
-              const formattedEndDate = endDate instanceof Date && !isNaN(endDate) 
-                ? endDate.toLocaleDateString() + ' ' + endDate.toLocaleTimeString() 
+              const formattedEndDate = !isNaN(endDate)
+                ? endDate.toLocaleDateString() + ' ' + endDate.toLocaleTimeString()
                 : 'Fecha inválida';
 
               return (
                 <tr key={index}>
+                  <td>{request.titulo || request.title || '—'}</td>
                   <td>{request.clienteNombre}</td>
-                  <td>{`${formattedStartDate} - ${formattedEndDate}`}</td> {/* Muestra la fecha de inicio y fin */}
+                  <td>{`${formattedStartDate} – ${formattedEndDate}`}</td>
                   <td>
-                    <Button variant="success" onClick={() => onAccept(request)}>
+                    <Button
+                      variant="success"
+                      size="sm"
+                      onClick={() => onAccept(request)}
+                    >
                       Aceptar
-                    </Button>
-                    <Button variant="danger" className="ms-2" onClick={() => onReject(request)}>
+                    </Button>{' '}
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() => onReject(request)}
+                    >
                       Rechazar
                     </Button>
                   </td>

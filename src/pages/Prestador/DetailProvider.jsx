@@ -7,13 +7,14 @@ import { AuthContext } from '../../context/AuthContext';
 import Calendar from '../../components/PrestadorServicio/Calendar';
 import '../../styles/PageStyles/DetailProvider.css';
 
-function deriveModel(user) {
-  if (user.accountType) return user.accountType;
-  // si tiene servicios, lo consideramos Provider
-  if (Array.isArray(user.servicios)) return 'Provider';
-  return 'User';
-}
-
+ function deriveModel(user) {
+    // Si no hay user, devolvemos un valor por defecto
+    if (!user) return 'Guest';
+    if (user.accountType) return user.accountType;
+    // si tiene servicios, lo consideramos Provider
+    if (Array.isArray(user.servicios)) return 'Provider';
+    return 'User';
+ }
 export default function DetailProvider() {
   const { id } = useParams();
   const navigate = useNavigate();

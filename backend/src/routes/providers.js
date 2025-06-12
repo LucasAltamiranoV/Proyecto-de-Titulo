@@ -347,6 +347,48 @@ router.post('/eventos/solicitar', async (req, res) => {
     res.status(500).json({ error: 'Error al solicitar evento', details: error.message });
   }
 });
+// Endpoint para agregar una valoración a un proveedor
+router.post('/:id/valoracion', authenticate, async (req, res) => {
+  try {
+    const { proveedorId, clienteId, calificacion } = req.body;
+
+    // Verificar que el cliente no se califique a sí mismo
+    if (proveedorId === clienteId) {
+      return res.status(400).json({ error: 'No puedes calificarse a ti mismo.' });
+    }
+
+    // Buscar al proveedor
+    const proveedor = await Provider.findById(proveedorId);
+    if (!proveedor) {
+      return res.status(404).json({ error: 'Proveedor no encontrado.' });
+    }
+
+    // Verificar si el cliente ya ha calificado a este proveedor
+    const existingRating = proveedor.valoraciones.find(v => v.usuarioId.toString() === clienteId.toString());
+    if (existingRating) {
+      // Si ya existe una valoración, actualizarla
+      existingRating.calificacion = calificacion;
+    } else {
+      // Si no existe, agregar la valoración
+      proveedor.valoraciones.push({ usuarioId: clienteId, calificacion });
+    }
+
+    // Recalcular el promedio de la calificación
+    const averageRating = proveedor.valoraciones.reduce((sum, val) => sum + val.calificacion, 0) / proveedor.valoraciones.length;
+    
+    // Actualizar la calificación promedio en el proveedor
+    proveedor.calificacion = averageRating;
+
+    // Guardar el proveedor con la nueva valoración
+    await proveedor.save();
+
+    res.json({ success: 'Valoración agregada con éxito', promedio: averageRating });
+  } catch (error) {
+    console.error('Error al agregar valoración:', error);
+    res.status(500).json({ error: 'Error al agregar valoración', details: error.message });
+  }
+});
+
 
 
 module.exports = router;

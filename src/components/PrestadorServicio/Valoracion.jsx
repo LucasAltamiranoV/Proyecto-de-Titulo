@@ -1,4 +1,5 @@
 import React from 'react';
+import '../../styles/Components/Valoracion.css';  // Asegúrate de que esta ruta sea correcta para los estilos
 
 /**
  * Valoracion
@@ -8,19 +9,32 @@ import React from 'react';
  *  - maxRating: número máximo de estrellas (por defecto 5)
  *  - onRate: callback cuando el usuario hace clic en una estrella (opcional)
  *  - readOnly: si es true, las estrellas no son clicables
+ *  - isSelfRating: si es true, el usuario no podrá calificar a sí mismo
  */
-const Valoracion = ({ rating = 0, maxRating = 5, onRate, readOnly = true }) => {
+export const Valoracion = ({
+  rating = 0,
+  maxRating = 5,
+  onRate,
+  readOnly = false,
+  currentUserId,
+  providerId
+}) => {
   const stars = [];
   const floor = Math.floor(rating);
+  const half = rating % 1 >= 0.5;
 
+  // Determina si el usuario puede calificar (no se puede calificar a sí mismo)
+  const isReadOnly = currentUserId === providerId || readOnly;
+
+  // Generar estrellas
   for (let i = 1; i <= maxRating; i++) {
     let iconClass;
     if (i <= floor) {
-      iconClass = 'bi-star-fill';   // llena
-    } else if (i === floor + 1 && rating % 1 >= 0.5) {
-      iconClass = 'bi-star-half';   // media estrella si rating decimal >= .5
+      iconClass = 'bi-star-fill';  // Estrella llena
+    } else if (i === floor + 1 && half) {
+      iconClass = 'bi-star-half';  // Estrella media si es decimal
     } else {
-      iconClass = 'bi-star';        // vacía
+      iconClass = 'bi-star';      // Estrella vacía
     }
 
     stars.push(
@@ -28,9 +42,9 @@ const Valoracion = ({ rating = 0, maxRating = 5, onRate, readOnly = true }) => {
         key={i}
         type="button"
         className="btn btn-link p-0 me-1 text-warning"
-        onClick={() => !readOnly && onRate && onRate(i)}
-        style={{ fontSize: '1.5rem', lineHeight: 1 }}
-        disabled={readOnly}
+        onClick={() => !isReadOnly && onRate && onRate(i)}  // Solo permite clic si no es solo lectura
+        style={{ fontSize: '2rem', lineHeight: 1 }}
+        disabled={isReadOnly}
       >
         <i className={`bi ${iconClass}`} />
       </button>
@@ -39,5 +53,3 @@ const Valoracion = ({ rating = 0, maxRating = 5, onRate, readOnly = true }) => {
 
   return <div className="d-flex align-items-center">{stars}</div>;
 };
-
-export default Valoracion;

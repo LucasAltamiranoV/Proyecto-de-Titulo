@@ -1,29 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
 import App from './App';
-import reportWebVitals from './reportWebVitals';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap-icons/font/bootstrap-icons.css';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
-// src/index.js (o en tu punto de entrada React)
-import axios from 'axios';
-axios.defaults.baseURL = 'http://localhost:4000';
 
-// Condicional para usar React.StrictMode solo en desarrollo
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  process.env.NODE_ENV === 'development' ? (
-    <React.StrictMode>
-      <App />
-    </React.StrictMode>
-  ) : (
-    <App />
-  )
+const root = ReactDOM.createRoot(
+  document.getElementById('root'),
+  { onRecoverableError: () => {} }  // ignorar avisos de render concurrente
 );
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+root.render(<App />);

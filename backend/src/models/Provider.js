@@ -7,7 +7,14 @@ const proveedorSchema = new mongoose.Schema({
   imagenUrl: { type: String },
   servicios: { type: [String], required: true }, // arreglo con servicios (ej. ["Manicura", "Pedicura"])
   ciudad: { type: String },
-  calificacion: { type: Number, min: 0, max: 5, default: 0 },
+
+
+    valoraciones: [{
+    usuarioId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    calificacion: { type: Number, min: 0, max: 5 }
+  }],
+
+  
   descripcion: { type: String },
   galeria: { type: [String], default: [] }, // URLs de imágenes
   eventos: [{  // Este es el nuevo campo que añadimos

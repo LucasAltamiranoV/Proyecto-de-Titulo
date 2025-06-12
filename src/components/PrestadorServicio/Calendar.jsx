@@ -1,125 +1,164 @@
-import React, { useState, useEffect,useContext } from 'react'; 
-
+import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { agregarEvento, getProviderEvents, getProviderEventRequests,solicitarEvento } from '../../services/providerService';  // Asegúrate de tener la función getProviderEventRequests
+import { agregarEvento, getProviderEvents, getProviderEventRequests, solicitarEvento } from '../../services/providerService';
 import esLocale from '@fullcalendar/core/locales/es';
+import { Modal, Button, Form, Toast } from 'react-bootstrap';
 
 export default function Calendar(props) {
-  const [currentEvents, setCurrentEvents] = useState([]);  // Eventos aprobados
-  const [eventRequests, setEventRequests] = useState([]);  // Solicitudes de eventos
+  const [currentEvents, setCurrentEvents] = useState([]);
+  const [eventRequests, setEventRequests] = useState([]);
   const { user } = useContext(AuthContext);
-  const clienteId = user?._id;  // Asumiendo que 'id' es el clienteId
-const clienteNombre = user?.nombre;  // Asumiendo que 'nombre' es el clienteNombre
-const accountType = user?.accountType || 'User'; // Usamos 'User' como valor por defecto si no existe accountType
-
+  const clienteId = user?._id;
+  const clienteNombre = user?.nombre;
+  const accountType = user?.accountType || 'User';
   const { providerId } = props;
 
-  // Recuperar los eventos y solicitudes de eventos del proveedor cuando el componente se monte
+  // Estados para el modal y toast
+  const [showModal, setShowModal] = useState(false);
+  const [modalTitle, setModalTitle] = useState('');
+  const [pendingSelectInfo, setPendingSelectInfo] = useState(null);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const token = localStorage.getItem('token'); // O recupera el token de otra manera
-
-        // Obtener los eventos aprobados
+        const token = localStorage.getItem('token');
         const events = await getProviderEvents(providerId, token);
         const formattedEvents = events.map(event => ({
           title: event.titulo,
-          start: event.inicio,  // Asegúrate de que 'inicio' sea una fecha en formato ISO
-          end: event.fin,      // Asegúrate de que 'fin' sea una fecha en formato ISO
+          start: event.inicio,
+          end: event.fin,
           allDay: event.todoElDia,
-          backgroundColor: 'green',  // Color para eventos aprobados
+          backgroundColor: 'green',
         }));
-        setCurrentEvents(formattedEvents);  // Establece los eventos aprobados en el estado
+        setCurrentEvents(formattedEvents);
 
-        // Obtener las solicitudes de eventos pendientes
-        const eventRequests = await getProviderEventRequests(providerId, token);  // Recupera las solicitudes de eventos
-        const formattedRequests = eventRequests.map(request => ({
-          title: `Solicitud: ${request.clienteNombre}`,
-          start: request.fecha, // La fecha de la solicitud
-          allDay: true, // Todo el día
-          backgroundColor: 'yellow',  // Color para solicitudes de eventos
+        const requests = await getProviderEventRequests(providerId, token);
+        const formattedRequests = requests.map(req => ({
+          title: `Solicitud: ${req.clienteNombre}`,
+          start: req.fecha,
+          allDay: true,
+          backgroundColor: 'yellow',
         }));
-        setEventRequests(formattedRequests);  // Establece las solicitudes en el estado
+        setEventRequests(formattedRequests);
       } catch (error) {
         console.error('Error al obtener los eventos o solicitudes:', error);
       }
     };
 
     fetchEvents();
-  }, [providerId]);  // Se ejecuta cuando cambia el `providerId`
+  }, [providerId]);
 
-  // Esta función maneja la creación de un nuevo evento cuando se selecciona una fecha
-const handleDateSelect = async (selectInfo) => {
-  let title = prompt('Por favor ingresa el título de tu evento');
+  const handleDateSelect = (selectInfo) => {
+    setPendingSelectInfo(selectInfo);
+    setModalTitle('');
+    setShowModal(true);
+  };
 
-  if (title) {
-    // Crea un evento con los datos proporcionados
+  const handleModalConfirm = async () => {
+    const selectInfo = pendingSelectInfo;
+    setShowModal(false);
+    if (!modalTitle) return;
+
     const newEvent = {
-      titulo: title,
-      inicio: selectInfo.start.toISOString(), // Convierte la fecha a formato ISO
-      fin: selectInfo.end.toISOString(),     // Convierte la fecha a formato ISO
-      todoElDia: selectInfo.allDay,          // Si es todo el día o no
+      titulo: modalTitle,
+      inicio: selectInfo.start.toISOString(),
+      fin: selectInfo.end.toISOString(),
+      todoElDia: selectInfo.allDay,
     };
 
     try {
-      const token = localStorage.getItem('token'); // O recupera el token de otra manera
-
-      // Verifica el tipo de cuenta y llama a la función correspondiente
+      const token = localStorage.getItem('token');
       if (accountType === 'User') {
-        // Si el accountType es 'User', llama a la función solicitarEvento
-           await solicitarEvento(providerId, newEvent.titulo, clienteId, clienteNombre, newEvent.inicio, newEvent.fin, newEvent.todoElDia);
-
-        alert('Solicitud creada con éxito');
+        await solicitarEvento(providerId, newEvent.titulo, clienteId, clienteNombre, newEvent.inicio, newEvent.fin, newEvent.todoElDia);
+        setToastMessage('Solicitud creada con éxito');
       } else {
-        // Si el accountType no es 'User', llama a la función agregarEvento
         await agregarEvento(providerId, newEvent, token);
-        alert('Evento agregado con éxito');
+        setToastMessage('Evento agregado con éxito');
       }
 
-      // Si la llamada fue exitosa, actualiza los eventos en el estado
-      setCurrentEvents((prevEvents) => [
-        ...prevEvents,
+      setCurrentEvents(prev => [
+        ...prev,
         {
           title: newEvent.titulo,
           start: newEvent.inicio,
           end: newEvent.fin,
           allDay: newEvent.todoElDia,
-          backgroundColor: 'green', // Color para los eventos agregados por el proveedor
-        },
+          backgroundColor: 'green',
+        }
       ]);
     } catch (error) {
-      console.error('Error al agregar el evento o solicitud:', error);
-      alert('Hubo un problema al agregar el evento o la solicitud');
+      console.error('Error al agregar evento o solicitud:', error);
+      setToastMessage('Hubo un problema al agregar el evento o la solicitud');
+    } finally {
+      setShowToast(true);
+      setPendingSelectInfo(null);
     }
-  }
-};
-
+  };
 
   return (
-    <FullCalendar
-      plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-      locale={esLocale}  // Usar el idioma español
-      headerToolbar={{
-        left: 'prev,next today',
-        center: 'title',
-        right: 'dayGridMonth,timeGridWeek,timeGridDay',
-      }}
-      initialView="dayGridMonth"
-      editable={true}
-      selectable={true}
-      selectMirror={true}
-      dayMaxEvents={true}
-      weekends={props.weekendsVisible}
-      events={[...currentEvents, ...eventRequests]}  // Combina los eventos aprobados y las solicitudes
-      select={handleDateSelect}  // Usamos la nueva función `handleDateSelect`
-      eventContent={renderEventContent}
-      eventClick={props.onEventClick}
-      eventsSet={props.onEvents}
-    />
+    <>
+      <FullCalendar
+        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+        locale={esLocale}
+        headerToolbar={{ left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' }}
+        initialView="dayGridMonth"
+        editable
+        selectable
+        selectMirror
+        dayMaxEvents
+        weekends={props.weekendsVisible}
+        events={[...currentEvents, ...eventRequests]}
+        select={handleDateSelect}
+        eventContent={renderEventContent}
+        eventClick={props.onEventClick}
+        eventsSet={props.onEvents}
+      />
+
+      {/* Modal para título de evento */}
+      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Nuevo Evento</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group>
+              <Form.Label>Título del Evento</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Ingresa el título"
+                value={modalTitle}
+                onChange={e => setModalTitle(e.target.value)}
+                autoFocus
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>Cancelar</Button>
+          <Button variant="primary" onClick={handleModalConfirm}>Crear</Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Toast de confirmación */}
+      <Toast
+        show={showToast}
+        onClose={() => setShowToast(false)}
+        delay={3000}
+        autohide
+        style={{ position: 'fixed', top: 20, right: 20, zIndex: 9999 }}
+      >
+        <Toast.Header>
+          <strong className="me-auto">Calendario</strong>
+        </Toast.Header>
+        <Toast.Body>{toastMessage}</Toast.Body>
+      </Toast>
+    </>
   );
 }
 
