@@ -99,3 +99,24 @@ export async function agregarEvento(id, evento, token) {
     console.error('Error al agregar evento:', data.error);
   }
 }
+// services/providerService.js
+export const getProviderEvents = async (providerId, token) => {
+  try {
+    const response = await fetch(`${API_URL}/${providerId}/events`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Error al obtener los eventos');
+    }
+
+    const events = await response.json();
+    return events; // Deberías recibir los eventos en el formato adecuado
+  } catch (error) {
+    console.error('Error al recuperar eventos del proveedor:', error);
+    throw error;
+  }
+};

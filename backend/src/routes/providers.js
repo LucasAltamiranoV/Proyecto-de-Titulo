@@ -204,5 +204,20 @@ router.post('/:id/eventos', authenticate, async (req, res) => {
     res.status(500).json({ error: 'Error al agregar el evento' });
   }
 });
+// En tu archivo de rutas (por ejemplo, `providers.js` en el backend)
+router.get('/:id/events', authenticate, async (req, res) => {
+  try {
+    const proveedor = await Provider.findById(req.params.id); // Busca al proveedor por ID
+    if (!proveedor) {
+      return res.status(404).json({ error: 'Proveedor no encontrado' });
+    }
+
+    res.json(proveedor.eventos); // Devuelve los eventos del proveedor
+  } catch (err) {
+    console.error('Error al obtener eventos:', err);
+    res.status(500).json({ error: 'Error al obtener eventos del proveedor' });
+  }
+});
+
 
 module.exports = router;

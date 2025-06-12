@@ -1,12 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { agregarEvento } from '../../services/providerService';  // Asegúrate de importar la función agregarEvento
+import { agregarEvento, getProviderEvents } from '../../services/providerService';  // Asegúrate de tener la función getProviderEvents
 
 export default function Calendar(props) {
-  const [currentEvents, setCurrentEvents] = useState(props.initialEvents);
+  const [currentEvents, setCurrentEvents] = useState([]);
+  const { providerId } = props;
+
+  // Recuperar los eventos del proveedor cuando el componente se monte
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const token = localStorage.getItem('token'); // O recupera el token de otra manera
+        const events = await getProviderEvents(providerId, token); // Supongamos que esta función devuelve los eventos
+        const formattedEvents = events.map(event => ({
+          title: event.titulo,
+          start: event.inicio,  // Asegúrate de que 'inicio' sea una fecha en formato ISO
+          end: event.fin,      // Asegúrate de que 'fin' sea una fecha en formato ISO
+          allDay: event.todoElDia,
+        }));
+        setCurrentEvents(formattedEvents);  // Establece los eventos en el estado con formato correcto
+      } catch (error) {
+        console.error('Error al obtener los eventos:', error);
+      }
+    };
+
+    fetchEvents();
+  }, [providerId]);  // Se ejecuta cuando cambia el `providerId`
 
   // Esta función maneja la creación de un nuevo evento cuando se selecciona una fecha
   const handleDateSelect = async (selectInfo) => {
@@ -24,7 +46,7 @@ export default function Calendar(props) {
       try {
         // Llama a la API para agregar el evento
         const token = localStorage.getItem('token'); // O recupera el token de otra manera
-        await agregarEvento(props.providerId, newEvent, token);
+        await agregarEvento(providerId, newEvent, token);
 
         // Si la llamada fue exitosa, actualiza los eventos en el estado
         setCurrentEvents((prevEvents) => [
@@ -58,7 +80,7 @@ export default function Calendar(props) {
       selectMirror={true}
       dayMaxEvents={true}
       weekends={props.weekendsVisible}
-      initialEvents={currentEvents}
+      events={currentEvents}  // Muestra los eventos en el calendario
       select={handleDateSelect}  // Usamos la nueva función `handleDateSelect`
       eventContent={renderEventContent}
       eventClick={props.onEventClick}
