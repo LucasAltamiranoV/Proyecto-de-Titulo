@@ -1,9 +1,8 @@
-// src/pages/All/BandejaEntrada.jsx
 import React, { useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
-import imagenPerfil from '../../assets/imagenPerfil.jpeg';
+import imagenPerfil from '../../assets/imagenPerfil.jpeg'; // Imagen por defecto
 import '../../styles/PageStyles/BandejaEntrada.css';
 
 export default function BandejaEntrada() {
@@ -30,11 +29,13 @@ export default function BandejaEntrada() {
                 : `/api/providers/detalle/${contactoId}`;
 
             let nombre = 'Sin nombre';
-            let imagen = imagenPerfil;
+            let imagen = imagenPerfil; // Imagen predeterminada en caso de error
             try {
               const datos = await axios.get(urlPerfil);
               nombre = datos.data.nombre || nombre;
-              imagen = datos.data.imagenUrl || imagen;
+              imagen = datos.data.imagenUrl
+                ? `http://localhost:4000${datos.data.imagenUrl}`
+                : imagen;
             } catch {
               console.warn(
                 `No se pudo obtener perfil de ${contactoModel} ${contactoId}`
@@ -47,7 +48,7 @@ export default function BandejaEntrada() {
               nombre,
               imagen,
               ultimoMensaje,
-              fecha
+              fecha,
             };
           })
         );
@@ -81,7 +82,14 @@ export default function BandejaEntrada() {
           className="bandeja-item"
           onClick={() => irAChat(conv)}
         >
-          <img src={conv.imagen} alt="perfil" className="bandeja-avatar" />
+          <img
+            src={conv.imagen}
+            alt="perfil"
+            className="bandeja-avatar"
+            onError={(e) => {
+              e.target.src = imagenPerfil; // Usa la imagen por defecto si no se puede cargar
+            }}
+          />
           <div className="bandeja-info">
             <div className="bandeja-nombre">{conv.nombre}</div>
             <div className="bandeja-mensaje">{conv.ultimoMensaje}</div>

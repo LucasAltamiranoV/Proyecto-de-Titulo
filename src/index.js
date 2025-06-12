@@ -11,12 +11,16 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import axios from 'axios';
 axios.defaults.baseURL = 'http://localhost:4000';
 
-
+// Condicional para usar React.StrictMode solo en desarrollo
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
+  process.env.NODE_ENV === 'development' ? (
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
+  ) : (
     <App />
-  </React.StrictMode>
+  )
 );
 
 // If you want to start measuring performance in your app, pass a function
