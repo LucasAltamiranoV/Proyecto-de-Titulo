@@ -19,7 +19,7 @@ function Home() {
   const handleRedirectToSearch = (searchTerm) => {
     if (!searchTerm || typeof searchTerm !== 'string') return;
     const encoded = encodeURIComponent(searchTerm.trim());
-    navigate(`/search?query=${encoded}`);
+    navigate(`/search?q=${encoded}`);
   };
 
   return (

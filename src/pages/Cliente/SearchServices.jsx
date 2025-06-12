@@ -1,19 +1,17 @@
-// src/pages/SearchServices.jsx
-
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import BarraDeBusqueda from '../../components/BarraDeBusqueda';
 import FiltroBusqueda from '../../components/FiltroBusqueda';
 import CardPrestadorPerfil from '../../components/PrestadorServicio/CardPrestadorPerfil';
 import axios from 'axios';
 
 function SearchServices() {
-  const [results, setResults] = useState([]);   // Resultados de búsqueda
+  const [results, setResults] = useState([]);  // Resultados de búsqueda
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
   const [searchParams, setSearchParams] = useSearchParams();
   const queryParam = searchParams.get('q') || '';
+  const navigate = useNavigate();
 
   // Cada vez que cambie queryParam en la URL, hacemos la búsqueda
   useEffect(() => {
@@ -46,6 +44,10 @@ function SearchServices() {
     setSearchParams({ q });
   };
 
+  const handleViewProfile = (profileId) => {
+    navigate(`/provider/detalle/${profileId}`);  // Redirigir al detalle del proveedor
+  };
+
   return (
     <div className="container mt-5">
       <h1 className="text-center mb-4">Buscar Prestadores</h1>
@@ -63,19 +65,30 @@ function SearchServices() {
       )}
 
       <div className="row justify-content-center">
-        {results.map((profile) => (
-          <div className="col-6 col-md-3 mb-3" key={profile._id}>
-            <CardPrestadorPerfil
-              imagenUrl={profile.imagenUrl || 'default-image.jpg'}
-              nombre={profile.nombre}
-              oficio={Array.isArray(profile.servicios)
-                ? profile.servicios.join(', ')
-                : 'Servicio'}
-              colorBarra="#bd4fca"
-              colorEtiqueta="#f5a623"
-            />
-          </div>
-        ))}
+        {results.map((profile) => {
+          // Asegúrate de que la imagen esté correctamente definida
+          const imageUrl = profile.imagenUrl
+            ? `http://localhost:4000${profile.imagenUrl}`  // Usa la URL completa para la imagen
+            : '/default-avatar.png';  // Imagen predeterminada si no hay imagen
+
+          return (
+            <div className="col-6 col-md-3 mb-3" key={profile._id}>
+              <CardPrestadorPerfil
+                imagenUrl={imageUrl}  // Pasa la URL de la imagen
+                nombre={profile.nombre}
+                oficio={
+                  Array.isArray(profile.servicios)
+                    ? profile.servicios.join(', ')
+                    : 'Servicio'
+                }
+                colorBarra="#bd4fca"
+                colorEtiqueta="#f5a623"
+                clickable={true}
+                onClick={() => handleViewProfile(profile._id)}  // Redirige al hacer clic
+              />
+            </div>
+          );
+        })}
       </div>
     </div>
   );
