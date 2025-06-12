@@ -49,6 +49,7 @@ const ImageDropdown = () => {
   const menuItems = [
     { label: 'Perfil', type: 'perfil' },
     { label: 'Mensajes', type: 'navigate', path: '/bandeja' },
+    { label: 'Soporte', type: 'navigate', path: '/soporte' },
     { label: 'Cerrar sesión', type: 'logout' }
   ];
 

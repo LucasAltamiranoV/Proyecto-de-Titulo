@@ -5,6 +5,7 @@ import Valoracion from '../../components/PrestadorServicio/Valoracion';
 import { FaMapMarkerAlt } from 'react-icons/fa';
 import { AuthContext } from '../../context/AuthContext';
 import Calendar from '../../components/PrestadorServicio/Calendar';
+import '../../styles/PageStyles/DetailProvider.css';
 
 function deriveModel(user) {
   if (user.accountType) return user.accountType;
@@ -132,16 +133,18 @@ export default function DetailProvider() {
 
       <div className="mt-5">
         <h5 className="mt-4">Agenda tu reserva</h5>
-        <Calendar
-          providerId={id}  // Pasa el ID del proveedor al calendario
-          weekendsVisible={provider.weekendsVisible}
-          initialEvents={provider.eventos}  // Pasa los eventos actuales del proveedor
-          accountType={accountType}  // Pasa el tipo de cuenta al calendario
-          onDateSelect={(selectInfo) => {
-            const { start, end } = selectInfo;
-            handleEventRequest(start, end); // Llama a la función para solicitar el evento
-          }}
-        />
+          <div className="Calendar__container">
+            <Calendar
+              providerId={id}  // Pasa el ID del proveedor al calendario
+              weekendsVisible={provider.weekendsVisible}
+              initialEvents={provider.eventos}  // Pasa los eventos actuales del proveedor
+              accountType={accountType}  // Pasa el tipo de cuenta al calendario
+              onDateSelect={(selectInfo) => {
+                const { start, end } = selectInfo;
+                handleEventRequest(start, end); // Llama a la función para solicitar el evento
+              }}
+            />
+          </div>
       </div>
     </div>
   );

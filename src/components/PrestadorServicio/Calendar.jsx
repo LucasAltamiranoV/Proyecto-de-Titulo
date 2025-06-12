@@ -6,6 +6,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { agregarEvento, getProviderEvents, getProviderEventRequests,solicitarEvento } from '../../services/providerService';  // Asegúrate de tener la función getProviderEventRequests
+import esLocale from '@fullcalendar/core/locales/es';
 
 export default function Calendar(props) {
   const [currentEvents, setCurrentEvents] = useState([]);  // Eventos aprobados
@@ -101,6 +102,7 @@ const handleDateSelect = async (selectInfo) => {
   return (
     <FullCalendar
       plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+      locale={esLocale}  // Usar el idioma español
       headerToolbar={{
         left: 'prev,next today',
         center: 'title',

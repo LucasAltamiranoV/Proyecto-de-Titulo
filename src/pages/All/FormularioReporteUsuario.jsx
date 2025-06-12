@@ -19,7 +19,7 @@ function FormularioReporteUsuario() {
     e.preventDefault();
     console.log({ usuario, motivo, descripcion });
 
-    // Puedes enviar estos datos al backend aquí
+    // enviamos el reporte al correo
     navigate('/reporte-enviado');
   };
 

@@ -106,7 +106,7 @@ router.get(
 //    Actualiza la descripción de un proveedor
 // ------------------------------------------------------------------
 // Actualizar descripción del proveedor autenticado
-router.put('/descripcion', authenticate, async (req, res) => {
+router.put('/:id/descripcion', authenticate, async (req, res) => {
   try {
     const { descripcion } = req.body;
     const updated = await Provider.findByIdAndUpdate(

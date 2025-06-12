@@ -1,0 +1,134 @@
+/* Container general */
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Roboto', sans-serif;
+  color: #333;
+  background-color: #f5f7fa;
+}
+
+/* Sección superior del perfil */
+.perfil-top {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  gap: 30px;
+  background: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Columna izquierda (foto, rating, ubicación, chat) */
+.perfil-columna {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.perfil-foto img {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.perfil-ubicacion {
+  display: flex;
+  align-items: center;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+.perfil-ubicacion svg {
+  margin-right: 8px;
+  color: #007bff;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-primary:hover {
+  background-color: #0069d9;
+}
+
+/* Columna derecha (datos del proveedor) */
+.perfil-lado-derecho .perfil-nombre {
+  font-size: 1.75rem;
+  margin: 0;
+  font-weight: 600;
+}
+
+.perfil-lado-derecho .perfil-oficio {
+  font-size: 1rem;
+  color: #777;
+  margin-top: 6px;
+}
+
+.perfil-descripcion {
+  margin-top: 16px;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/* Galería de imágenes */
+.perfil-galeria {
+  margin-top: 30px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+}
+
+.galeria-imagen img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+/* Título de sección de calendario */
+h5 {
+  font-size: 1.25rem;
+  margin-bottom: 15px;
+  font-weight: 500;
+}
+
+/* Estilo del componente Calendar */
+.Calendar__container {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .perfil-top {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .perfil-columna {
+    flex-direction: row;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .perfil-lado-derecho {
+    padding-top: 20px;
+  }
+
+  .perfil-galeria {
+    justify-items: center;
+  }
+}
