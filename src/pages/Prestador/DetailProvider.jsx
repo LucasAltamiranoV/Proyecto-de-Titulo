@@ -70,13 +70,15 @@ export default function DetailProvider() {
     return <div className="text-center my-5">Proveedor no encontrado.</div>;
   }
 
+    const imageUrl = provider.imagenUrl ? `http://localhost:4000${provider.imagenUrl}` : '/default-avatar.png';  // Reemplaza con la URL base del servidor
+
   return (
     <div className="container mt-5">
       <div className="perfil-top d-flex flex-wrap">
         <div className="perfil-columna me-4">
-          {provider.imagenUrl && (
+          {imageUrl && (
             <div className="perfil-foto">
-              <img src={provider.imagenUrl} alt="Foto del proveedor" />
+              <img src={imageUrl} alt="Foto del proveedor" className="img-fluid rounded-circle" />
             </div>
           )}
 
