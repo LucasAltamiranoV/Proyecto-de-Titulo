@@ -1,3 +1,22 @@
+/**
+ * ============================================
+ *  PROYECTO DE TÍTULO - TuExpertoCerca.com
+ * ============================================
+ * Autores:
+ * - Jatsury Génesis Neira Tapia       | RUT: [12345678-9]
+ * - Lucas Francisco Altamirano Villarroel | RUT: [98765432-1]
+ * 
+ * Fecha         : [13/06/2025]
+ * Asignatura    : Proyecto de Título
+ * Profesor(a)   : [Sandra Cano Mazuera]
+ * 
+ * Institución   : [Pontificia Universidad Católica de Valparaíso]
+ * 
+ * ============================================
+ */
+
+
+
 import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import NavbarLogOut from './components/NavbarLogOut';

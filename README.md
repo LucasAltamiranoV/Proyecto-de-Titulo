@@ -1,70 +1,84 @@
-# Getting Started with Create React App
+===========================
+ENTREGA DE SOFTWARE - PROYECTO DE TÍTULO
+===========================
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+REPOSITORIO GITHUB:
+[Coloca aquí el enlace al repositorio que contiene el front-end y back-end]
 
-## Available Scripts
+---------------------------
+TÍTULO DEL PROYECTO:
+[TUEXPERTOCERCA.COM]
 
-In the project directory, you can run:
+---------------------------
+NOMBRES DE LOS ESTUDIANTES:
+- [JATSURY NEIRA TAPIA]
+- [LUCAS FRANCISCO ALTAMIRANO VILLARROEL]
 
-### `npm start`
+---------------------------
+DESCRIPCIÓN BREVE DEL PROYECTO:
+[TuExpertoCerca.com es una plataforma web que conecta a clientes con proveedores de servicios informales. 
+Permite buscar oficios por ubicación y especialidad, visualizar perfiles, valorar servicios y comunicarse 
+mediante chat en tiempo real, facilitando una contratación rápida, efectiva, segura y digital.]
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+---------------------------
+REQUERIMIENTOS FUNCIONALES:
+1. [El sistema permitirá realizar un registro en modo
+“Cliente”. El usuario deberá ingresar datos en un formulario:
+• Nombres
+• Apellidos
+• Correo electró]
+2. [El sistema validará la existencia del correo utilizado para registrarse. En caso de ya estar en uso, dará el mensaje por pantalla.]
+3. [El sistema permitirá la recuperación de clave por correo del usuario.]
+4. [El sistema permitirá el inicio de sesión del usuario mediante correo y contraseña. En caso de ser errónea cualquiera de ambos campos, se mostrará un mensaje por pantalla del error]
+5. [El sistema permitirá al usuario buscar prestadores de servicios mediante una barra de búsqueda, la cual estará compuesta por una opción de filtrado, que tendrá:
+• Filtro por región
+• Filtro por valoración]
+6. [El sistema permitirá al usuario ver una lista con miniaturas de los perfiles de los prestadores de servicios.]
+7. [El sistema permitirá al usuario ver una versión extendida del perfil del prestador de servicios, en la cual verá su nombre y apellido, años de experiencia, localidad, y su valoración.]
+8. [El sistema permitirá al usuario abrir un chat privado de mensajería con el prestador de servicios para acordar una cita de trabajo.]
+9. [El sistema proporcionará una bandeja de entrada de mensajes con una lista de los chats a los distintos prestadores de servicios con lo que se está comunicando.]
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+10. [El sistema permitirá realizar un registro en modo “Prestador de servicios”. El usuario deberá ingresar datos en un formulario:
+• Nombres
+• Apellidos
+• Correo electrónico
+• Nombre del oficio
+• Contraseña]
+11. [El sistema permitirá al prestador de servicios modificar la descripción de perfil y su fotografía]
+12. [El sistema mostrará una bandeja de entrada de los chats que posee el prestador de servicios.]
+13. [El sistema permitirá a los prestadores de servicios gestionar y visualizar un calendario en su perfil, donde podrán establecer sus horas disponibles para la prestación de servicios.]
+14. [El sistema mostrará en el perfil del prestador de servicio una calificación bajo su foto de perfil, donde aparecerá un promedio de estrellas con las que los usuarios han calificado sus servicios. Las estrellas serán entre 1 a 5.]
 
-### `npm test`
+15. [El sistema permitirá al administrador el inicio de sesión a su cuenta mediante correo y contraseña.]
+16. [El sistema permitirá al administrador gestionar (CRUD) perfiles de clientes.]
+17. [El sistema permitirá al administrador gestionar (CRUD) perfiles de prestadores de servicios.]
+18. [El sistema permitirá al administrador visualizar reportes de chats]
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+19. [El sistema permitirá solo a clientes iniciar conversaciones en chat con prestadores de servicios.] 
+20. [El sistema permitirá reportar chats, desplegando posibles motivos y un apartado para redactar en caso de ser necesario.]
 
-### `npm run build`
+REQUERIMIENTOS NO FUNCIONALES:
+1. [La plataforma debe tener una interfaz responsiva de acuerdo al dispositivo utilizado.]
+2. [La plataforma debe tener diseño intuitivo, siendo diseñada de forma minimalista y con la información necesaria para evitar distracciones o confusiones.]
+3. [La plataforma debe garantizar la protección y seguridad de los datos mediante correos de confirmación por registro e inicios de sesión, añadiendo también un cifrado de datos personales.]
+4. [La plataforma debe validar el formato de los datos ingresados por el usuario y mostrar mensajes de error específicos cuando el formato no sea correcto, como por ejemplo en campos de correo electrónico o contraseñas.]
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+---------------------------
+TECNOLOGÍAS USADAS:
+Frontend:
+- [Ejemplo: ReactJS, Bootstrap, Css]
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Backend:
+- [Ejemplo: Node.js, Express, MongoDB, Mongoose]
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Otras dependencias:
+- [Soocket.io, FullCalendar]
 
-### `npm run eject`
+---------------------------
+ANOTACIONES:
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+*Al usar MongoDB atlas, la base de datos está en línea. La URI y todo lo que necesita para conectarse está en el archivo .env.example
+Ahí encontrará las credenciales de un usuario creado especialmente para la prueba.
+*En el archivo .env.example también se encontrará las credenciales de Gmail para realizar las pruebas de Registros de Usuarios.
+*En caso de necesitar algo más que se nos haya pasado, le responderemos a la brevedad.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
