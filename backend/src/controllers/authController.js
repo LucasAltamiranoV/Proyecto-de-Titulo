@@ -19,10 +19,6 @@ export const register = async (req, res) => {
     descripcion                          //campo para ambos usuarios
   } = req.body;
 
-  // Validaciones básicas
-  if (!['User', 'Provider'].includes(accountType)) {
-    return res.status(400).json({ error: 'accountType inválido.' });
-  }
   if (accountType === 'Provider' && (!servicios || !servicios.length)) {
     return res.status(400).json({ error: 'Un proveedor debe enviar al menos un servicio.' });
   }
@@ -114,50 +110,66 @@ export const confirmEmail = async (req, res) => {
 };
 
 // ------------------------------------------------------------------
-// 3) Login para usuario o proveedor
+// 3) Login para usuario o proveedor o adMIN
 // ------------------------------------------------------------------
 export const login = async (req, res) => {
   const { correo, clave } = req.body;
   try {
-    // Primero buscamos en Provider, si no, en User
+    // Primero buscar en Provider
     let user = await Provider.findOne({ correo });
-    let userModel = 'Provider';
+    let model = 'Provider';
+
+    // Si no es provider, buscar en User
     if (!user) {
       user = await User.findOne({ correo });
-      userModel = 'User';
+      model = 'User';
     }
+
+    // Si no existe
     if (!user) {
       return res.status(400).json({ error: 'Correo o clave incorrectas.' });
     }
 
+    // Comparar clave
     const match = await bcrypt.compare(clave, user.clave);
     if (!match) {
       return res.status(400).json({ error: 'Correo o clave incorrectas.' });
     }
 
-    // Incluimos el tipo de cuenta en el token
+    // Extraer role (sólo para User)
+    const role = model === 'User' ? user.role : 'provider';
+
+    // Firmar token incluyendo role y accountType
     const token = jwt.sign(
-      { id: user._id, correo: user.correo, accountType: userModel },
+      {
+        id: user._id,
+        correo: user.correo,
+        accountType: model,
+        role,
+      },
       process.env.JWT_SECRET,
       { expiresIn: '12h' }
     );
 
-    return res.json({
-      message: 'Login exitoso',
-      token,
-      user: {
-        _id: user._id,
-        nombre: user.nombre,
-        correo: user.correo,
-        accountType: userModel,
-        servicios: userModel === 'Provider' ? user.servicios : []
-      }
-    });
+    // Construir objeto userResponse
+    const userResponse = {
+      _id: user._id,
+      nombre: user.nombre,
+      correo: user.correo,
+      accountType: model,
+      role,
+    };
+    if (model === 'Provider') {
+      userResponse.servicios = user.servicios;
+    }
+
+    return res.json({ message: 'Login exitoso', token, user: userResponse });
   } catch (error) {
-    console.error(error);
+    console.error('Login error:', error);
     return res.status(500).json({ error: 'Error en el servidor.' });
   }
 };
+
 /////////////////////////////////////////////////////
 // (4)Obtener perfiles aleatorios de proveedores
 export const randomProfiles = async (req, res) => {

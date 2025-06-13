@@ -1,14 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import TituloCrearInicio from '../../components/TituloCrearInicio';
 import { LabeledInput } from '../../components/formularios/LabelGenerico';
-import logo from '../../assets/logo.png'; // Asegúrate de que este path sea correcto
+import logo from '../../assets/logo.png';
+import { Modal, Button } from 'react-bootstrap';             // <-- importar Modal
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const LoginPage = ({ onLogin }) => {
-  const [correo, setCorreo] = useState('');
-  const [clave, setClave] = useState('');
+const LoginPage = ({ onLogin, error }) => {
+  const [correo, setCorreo]     = useState('');
+  const [clave, setClave]       = useState('');
   const [localError, setLocalError] = useState('');
+  const [showError, setShowError]   = useState(false);
+
+  // Cuando cambie error (del backend), mostramos el modal
+  useEffect(() => {
+    if (error) {
+      setShowError(true);
+    }
+  }, [error]);
 
   const handleSubmit = e => {
     e.preventDefault();
@@ -16,48 +25,44 @@ const LoginPage = ({ onLogin }) => {
       setLocalError('Por favor ingresa correo y clave para continuar.');
       return;
     }
-    setLocalError(''); // Limpiar error local
-    onLogin?.({ correo, clave }); // Enviar los datos al backend
+    setLocalError('');
+    onLogin({ correo, clave });
   };
 
   return (
     <div className="container py-5">
-      {/* Mostrar mensaje de error si hay uno (local o del backend) */}
-      {(localError ) && (
+      {/* Modal de error */}
+      <Modal show={showError} onHide={() => setShowError(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Error al iniciar sesión</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {error}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowError(false)}>
+            Cerrar
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Mensaje de validación local */}
+      {localError && (
         <div className="alert alert-danger text-center">
-          {localError }
+          {localError}
         </div>
       )}
-    
+
       <div className="row align-items-center">
-        {/* Imagen lateral */}
         <div className="col-md-5 d-flex justify-content-center mb-4 mb-md-0">
-          <img
-            src={logo}
-            alt="Logo"
-            className="img-fluid"
-            style={{ maxWidth: '300px' }}
-          />
+          <img src={logo} alt="Logo" className="img-fluid" style={{ maxWidth: '300px' }} />
         </div>
-
-        {/* Formulario de login */}
         <div className="col-md-7">
-          <TituloCrearInicio
-            texto="Iniciar sesión"
-            height="140px"
-            fontSize="clamp(1.5rem, 5vw, 2.5rem)"
-          />
+          <TituloCrearInicio texto="Iniciar sesión" height="140px" fontSize="clamp(1.5rem, 5vw, 2.5rem)" />
 
-          <p className="text-center mt-2 text-muted">
-            ¿Ya tienes cuenta? Accede
-          </p>
+          <p className="text-center mt-2 text-muted">¿Ya tienes cuenta? Accede</p>
 
-          <form
-            onSubmit={handleSubmit}
-            className="mx-auto mt-3"
-            style={{ maxWidth: '450px' }}
-            noValidate
-          >
+          <form onSubmit={handleSubmit} className="mx-auto mt-3" style={{ maxWidth: '450px' }} noValidate>
             <div className="mb-3">
               <LabeledInput
                 label="Correo electrónico"

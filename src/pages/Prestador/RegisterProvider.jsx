@@ -157,7 +157,7 @@ export default function RegistroProveedor() {
       />
 
       <div className="text-center mt-4">
-        <Link to="/login" className="btn btn-link">
+        <Link to="/" className="btn btn-link">
           ¿Ya tienes cuenta? Inicia sesión aquí
         </Link>
       </div>
