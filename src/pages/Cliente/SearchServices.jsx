@@ -1,91 +1,105 @@
+
+// src/pages/SearchServices.jsx
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import BarraDeBusqueda from '../../components/BarraDeBusqueda';
-import FiltroBusqueda from '../../components/FiltroBusqueda';
+import FilterButton from '../../components/FiltroBusqueda';
 import CardPrestadorPerfil from '../../components/PrestadorServicio/CardPrestadorPerfil';
 import axios from 'axios';
 
 function SearchServices() {
-  const [results, setResults] = useState([]);  // Resultados de búsqueda
+  const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
   const [searchParams, setSearchParams] = useSearchParams();
-  const queryParam = searchParams.get('q') || '';
+  const combinedParam = searchParams.get('q') || '';
+
+  // Estados individuales para término y región
+  const [term, setTerm]   = useState('');
+  const [region, setRegion] = useState(null);
+
   const navigate = useNavigate();
 
-  // Cada vez que cambie queryParam en la URL, hacemos la búsqueda
+  // Sincronizar estados term y region con la query inicial
   useEffect(() => {
-    const performSearch = async () => {
-      if (!queryParam.trim()) {
-        setResults([]);
-        return;
-      }
+    const parts = combinedParam.split(/\s+/);
+    const last = parts.pop();
+    if (FilterButtonRegions.includes(last)) {
+      setRegion(last);
+      setTerm(parts.join(' '));
+    } else {
+      setTerm(combinedParam);
+    }
+  }, [combinedParam]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!combinedParam.trim()) return setResults([]);
       setLoading(true);
       setError(null);
       try {
-        const response = await axios.get(
-          `http://localhost:4000/api/auth/search?q=${encodeURIComponent(queryParam)}`
+        const res = await axios.get(
+          `http://localhost:4000/api/auth/search?q=${encodeURIComponent(combinedParam)}`
         );
-        setResults(response.data);
+        setResults(res.data);
       } catch (err) {
-        console.error('Error al buscar proveedores:', err);
-        setError('Hubo un error al buscar. Intenta nuevamente.');
-        setResults([]);
+        console.error(err);
+        setError('Hubo un error al buscar.');
       } finally {
         setLoading(false);
       }
     };
+    fetchData();
+  }, [combinedParam]);
 
-    performSearch();
-  }, [queryParam]);  // Vuelve a ejecutar cuando `q` cambie
-
-  const handleSearch = (q) => {
-    // Cambia el parámetro 'q' en la URL; dispara el useEffect
-    setSearchParams({ q });
+  const handleSearch = q => {
+    setTerm(q);
+    const combined = region ? `${q} ${region}` : q;
+    setSearchParams({ q: combined });
   };
 
-  const handleViewProfile = (profileId) => {
-    navigate(`/provider/detalle/${profileId}`);  // Redirigir al detalle del proveedor
+  const handleFilter = r => {
+    setRegion(r);
+    const combined = r ? `${term} ${r}` : term;
+    setSearchParams({ q: combined });
   };
+
+  const handleViewProfile = id => navigate(`/provider/detalle/${id}`);
 
   return (
     <div className="container mt-5">
       <h1 className="text-center mb-4">Buscar Prestadores</h1>
 
       <div className="d-flex flex-wrap align-items-center justify-content-center gap-2 mb-4">
-        {/* Pasamos handleSearch para que el usuario pueda buscar de nuevo */}
         <BarraDeBusqueda onSearch={handleSearch} />
-        <FiltroBusqueda />
+        <FilterButton region={region} onFilter={handleFilter} />
       </div>
 
       {loading && <p className="text-center">Cargando resultados...</p>}
-      {error && <p className="text-center text-danger">{error}</p>}
-      {!loading && results.length === 0 && !error && (
+      {error   && <p className="text-center text-danger">{error}</p>}
+      {!loading && !error && results.length === 0 && (
         <p className="text-center">No se han encontrado resultados.</p>
       )}
 
       <div className="row justify-content-center">
-        {results.map((profile) => {
-          // Asegúrate de que la imagen esté correctamente definida
+        {results.map(profile => {
           const imageUrl = profile.imagenUrl
-            ? `http://localhost:4000${profile.imagenUrl}`  // Usa la URL completa para la imagen
-            : '/default-avatar.png';  // Imagen predeterminada si no hay imagen
-
+            ? `http://localhost:4000${profile.imagenUrl}`
+            : '/default-avatar.png';
           return (
             <div className="col-6 col-md-3 mb-3" key={profile._id}>
               <CardPrestadorPerfil
-                imagenUrl={imageUrl}  // Pasa la URL de la imagen
+                imagenUrl={imageUrl}
                 nombre={profile.nombre}
-                oficio={
-                  Array.isArray(profile.servicios)
-                    ? profile.servicios.join(', ')
-                    : 'Servicio'
-                }
+                oficio={Array.isArray(profile.servicios)
+                  ? profile.servicios.join(', ')
+                  : 'Servicio'}
                 ubicacion={profile.ciudad}
                 colorBarra="#bd4fca"
                 colorEtiqueta="#f5a623"
-                clickable={true}
-                onClick={() => handleViewProfile(profile._id)}  // Redirige al hacer clic
+                clickable
+                onClick={() => handleViewProfile(profile._id)}
               />
             </div>
           );
@@ -96,3 +110,10 @@ function SearchServices() {
 }
 
 export default SearchServices;
+
+const FilterButtonRegions = [
+  'Arica y Parinacota', 'Tarapacá', 'Antofagasta', 'Atacama',
+  'Coquimbo', 'Valparaíso', 'Santiago', 'O’Higgins',
+  'Maule', 'Ñuble', 'Biobío', 'La Araucanía',
+  'Los Ríos', 'Los Lagos', 'Aysén', 'Magallanes y la Antártica Chilena',
+];
