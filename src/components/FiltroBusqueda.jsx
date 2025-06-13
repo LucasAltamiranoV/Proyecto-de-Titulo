@@ -2,7 +2,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import '../styles/Components/FiltroBusqueda.css';
 
-// `onFilter` recibe la función de filtrado; agregamos valor por defecto para evitar errores
 const FilterButton = ({ region, onFilter = () => {} }) => {
   const [open, setOpen] = useState(false);
   const regions = [
