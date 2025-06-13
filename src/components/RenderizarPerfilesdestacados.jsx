@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import CardPrestadorPerfil from './PrestadorServicio/CardPrestadorPerfil';
 import { AuthContext } from '../context/AuthContext';
+import {Valoracion} from './PrestadorServicio/Valoracion';
 
 const PerfilesDestacados = () => {
   const [profiles, setProfiles] = useState([]);
@@ -49,15 +50,21 @@ const PerfilesDestacados = () => {
     };
     navigate('/inbox', { state: { contacto } });
   };
+    // Función para calcular promedio
+  const calcularPromedio = (valoraciones = []) => {
+    if (!valoraciones.length) return 0;
+    const suma = valoraciones.reduce((acc, v) => acc + (v.calificacion || 0), 0);
+    return suma / valoraciones.length;
+  };
 
   return (
     <section className="mb-4">
       <div className="row justify-content-center">
-        {profiles.map((profile) => {
-          // Verifica si la URL de la imagen está disponible
+         {profiles.map((profile) => {
+          const avgRating = calcularPromedio(profile.valoraciones);
           const imageUrl = profile.imagenUrl
-            ? `http://localhost:4000${profile.imagenUrl}`  // Usa la URL completa para la imagen
-            : '/default-avatar.png';  // Imagen predeterminada si no hay imagen
+            ? `http://localhost:4000${profile.imagenUrl}`
+            : '/default-avatar.png';
 
           return (
             <div className="col-6 col-md-3 mb-3" key={profile._id}>
@@ -75,6 +82,11 @@ const PerfilesDestacados = () => {
                 clickable={true}
                 onClick={() => handleVerPerfil(profile)}
               />
+               {/* Aquí mostramos la valoración promedio */}
+              <div className="text-center mt-2">
+                <Valoracion rating={avgRating} maxRating={5} readOnly />
+                <span>({avgRating.toFixed(1)})</span>
+              </div>
 
               <div style={{ marginTop: '8px', textAlign: 'center' }}>
                 <button
