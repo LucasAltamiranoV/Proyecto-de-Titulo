@@ -77,8 +77,8 @@ Otras dependencias:
 ---------------------------
 ANOTACIONES:
 
-*Al usar MongoDB atlas, la base de datos está en línea. La URI y todo lo que necesita para conectarse está en el archivo .env.example
+*Al usar MongoDB atlas, la base de datos está en línea. La URI y todo lo que necesita para conectarse está en el archivo .env
 Ahí encontrará las credenciales de un usuario creado especialmente para la prueba.
-*En el archivo .env.example también se encontrará las credenciales de Gmail para realizar las pruebas de Registros de Usuarios.
+*En el archivo .env también se encontrará las credenciales de Gmail para realizar las pruebas de Registros de Usuarios.
 *En caso de necesitar algo más que se nos haya pasado, le responderemos a la brevedad.
 
