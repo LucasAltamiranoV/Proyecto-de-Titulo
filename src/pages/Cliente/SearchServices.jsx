@@ -81,6 +81,7 @@ function SearchServices() {
                     ? profile.servicios.join(', ')
                     : 'Servicio'
                 }
+                ubicacion={profile.ciudad}
                 colorBarra="#bd4fca"
                 colorEtiqueta="#f5a623"
                 clickable={true}

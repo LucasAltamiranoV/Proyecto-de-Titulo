@@ -9,7 +9,7 @@ function BarraDeBusqueda({ onSearch }) {
     if (onSearch) {
       onSearch(query);
     } else {
-      console.log('Buscando:', query); // Solo por ahora
+      console.log('Buscando:', query); 
     }
   };
 

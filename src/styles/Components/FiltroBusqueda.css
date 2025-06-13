@@ -60,3 +60,50 @@
   background-color: #fce9fb; /* suave rosado */
   color: #d96ce2;
 }
+
+/* Estilo para las subcategorías de regiones, a la derecha del filtro */
+.subcategorias-dropdown {
+  position: absolute;
+  top: 0;
+  left: 100%; /* Alineación a la derecha */
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  padding: 8px 0;
+  list-style: none;
+  z-index: 10;
+  min-width: 180px;
+}
+
+.subcategorias-dropdown li {
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-size: 0.95rem;
+}
+
+.subcategorias-dropdown li:hover {
+  background-color: #fce9fb; /* suave rosado */
+  color: #d96ce2;
+}
+
+/* Estilos para mostrar la región seleccionada debajo del filtro */
+.selected-filters {
+  margin-top: 10px;
+  font-size: 0.95rem;
+}
+
+.selected-region {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.selected-region button {
+  background: transparent;
+  border: none;
+  color: #d96ce2;
+  cursor: pointer;
+  font-size: 1rem;
+}

@@ -186,30 +186,43 @@ export const randomProfiles = async (req, res) => {
 export const searchProviders = async (req, res) => {
   try {
     const { q } = req.query;
-    if (!q || q.trim() === '') {
-      return res.json([]);
-    }
-    const term = q.trim();
-    const num = parseFloat(term);
-    const isNum = !isNaN(num);
-    const regex = new RegExp(term, 'i');
+    if (!q || !q.trim()) return res.json([]);
 
-    const orConditions = [
-      { nombre: { $regex: regex } },
-      { servicios: { $regex: regex } },
-      { ciudad: { $regex: regex } }
-    ];
-    if (isNum) {
-      orConditions.push({ calificacion: { $gte: num } });
-    }
+    // 1. Función para escapar caracteres especiales en la RegExp
+    const escapeRegExp = (str) =>
+      str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-    const results = await Provider.find({ $or: orConditions }).select('-clave');
+    // 2. Dividir en tokens
+    const tokens = q.trim().split(/\s+/);
+
+    // 3. Para cada token, construir un sub-$or
+    const andConditions = tokens.map(token => {
+      const regex = new RegExp(escapeRegExp(token), 'i');
+      const orSub = [
+        { nombre:  { $regex: regex } },
+        { servicios:{ $regex: regex } },
+        { ciudad:  { $regex: regex } },
+      ];
+      // Si el token es numérico, añadir búsqueda por calificación
+      const num = parseFloat(token);
+      if (!isNaN(num)) {
+        orSub.push({ calificacion: { $gte: num } });
+      }
+      return { $or: orSub };
+    });
+
+    // 4. Ejecutar consulta AND → OR
+    const results = await Provider
+      .find({ $and: andConditions })
+      .select('-clave');
+
     return res.json(results);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: 'Error al buscar proveedores.' });
   }
 };
+
 /////////////////////////////////////////
 //crear administrador
 // 6) Crear admin (solo una vez o cuando sea necesario)
