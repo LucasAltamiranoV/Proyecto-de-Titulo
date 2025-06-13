@@ -3,19 +3,19 @@ ENTREGA DE SOFTWARE - PROYECTO DE TÍTULO
 ===========================
 
 REPOSITORIO GITHUB:
-[Coloca aquí el enlace al repositorio que contiene el front-end y back-end]
+[https://github.com/LucasAltamiranoV/Proyecto-de-Titulo.git]
 
 ---------------------------
 TÍTULO DEL PROYECTO:
 [TUEXPERTOCERCA.COM]
 
 ---------------------------
-NOMBRES DE LOS ESTUDIANTES:
-- [JATSURY NEIRA TAPIA]
+NOMBRES:
+- [JATSURY GENESSIS NEIRA TAPIA]
 - [LUCAS FRANCISCO ALTAMIRANO VILLARROEL]
 
 ---------------------------
-DESCRIPCIÓN BREVE DEL PROYECTO:
+DESCRIPCIÓN:
 [TuExpertoCerca.com es una plataforma web que conecta a clientes con proveedores de servicios informales. 
 Permite buscar oficios por ubicación y especialidad, visualizar perfiles, valorar servicios y comunicarse 
 mediante chat en tiempo real, facilitando una contratación rápida, efectiva, segura y digital.]
