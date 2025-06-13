@@ -21,3 +21,23 @@ export const loginUser = async (userData) => {
     throw error.response?.data || { error: 'Error en la solicitud' };
   }
 };
+
+
+// Función para obtener todos los usuarios y proveedores
+export const obtenerUsuariosYProveedores = async (token) => {
+  try {
+    console.log('Obteniendo todos los usuarios y proveedores con token:', token);
+
+    const response = await axios.get(`${API_URL}/getAllUserSistem`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    console.log('Usuarios y proveedores obtenidos:', response.data);
+    return response.data; // Devuelve la lista de usuarios y proveedores
+  } catch (error) {
+    console.error('Error al obtener usuarios y proveedores:', error);
+    throw error;
+  }
+};

@@ -24,6 +24,7 @@ import MenuAdmin from './pages/Admin/MenuAdmin';
 import GestionUsuarios from './pages/Admin/GestionUsuarios';
 import ReportesFuncionamiento from './pages/Admin/ReportesFuncionamiento';
 import ReportesUsuarios from './pages/Admin/ReportesUsuarios';
+import AdminSetup from './services/AdminSetup'; 
 
 import ConfirmarCuenta from './pages/All/ConfirmarCuenta';
 import { AuthProvider } from './context/AuthContext';
@@ -66,6 +67,7 @@ function App() {
             <Route exact  path="/provider/detalle/:id" element={<DetailProvider />} />
 
             {/* Rutas admin */}
+            <Route path="/CreateAdmin" element={<AdminSetup />} />
             <Route path="/admin" element={<MenuAdmin />} />
             <Route path="/admin/usuarios" element={<GestionUsuarios />} />
             <Route path="/admin/reportes-app" element={<ReportesFuncionamiento />} />

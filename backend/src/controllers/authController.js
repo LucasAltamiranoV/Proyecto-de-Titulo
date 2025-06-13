@@ -13,7 +13,7 @@ export const register = async (req, res) => {
     nombre,
     correo,
     clave,
-    accountType,    // 'User' o 'Provider' //estoo, como se hace, crea o envia????????????
+    accountType,    // 'User' o 'Provider' 
     servicios,      // solo para Provider
     ciudad,         // solo para Provider
     descripcion                          //campo para ambos usuarios
@@ -158,8 +158,8 @@ export const login = async (req, res) => {
     return res.status(500).json({ error: 'Error en el servidor.' });
   }
 };
-
-// Obtener perfiles aleatorios de proveedores
+/////////////////////////////////////////////////////
+// (4)Obtener perfiles aleatorios de proveedores
 export const randomProfiles = async (req, res) => {
   try {
     const providers = await Provider.aggregate([{ $sample: { size: 4 } }]);
@@ -167,7 +167,7 @@ export const randomProfiles = async (req, res) => {
       _id: p._id,
       nombre: p.nombre,
       correo: p.correo,
-      imagenUrl: p.imagenUrl, // me carga la imagen pero solo la url, no la imagen en sí ¡?????
+      imagenUrl: p.imagenUrl, 
       servicios: p.servicios,
       ciudad: p.ciudad,
       calificacion: p.calificacion,
@@ -181,8 +181,8 @@ export const randomProfiles = async (req, res) => {
       .json({ error: 'Error al obtener perfiles aleatorios.' });
   }
 };
-
-// Búsqueda de proveedores
+////////////////////////////////////////////
+// (5)Búsqueda de proveedores
 export const searchProviders = async (req, res) => {
   try {
     const { q } = req.query;
@@ -210,4 +210,54 @@ export const searchProviders = async (req, res) => {
     return res.status(500).json({ error: 'Error al buscar proveedores.' });
   }
 };
+/////////////////////////////////////////
+//crear administrador
+// 6) Crear admin (solo una vez o cuando sea necesario)
+export const createAdmin = async (req, res) => {
+  const { nombre, correo, clave } = req.body;
+  try {
+    const existsAdmin = await User.findOne({ role: 'admin' });
+    if (existsAdmin) {
+      return res.status(400).json({ error: 'Ya existe un admin registrado' });
+    }
+
+    const hashedPassword = await bcrypt.hash(clave, 10);
+
+    const admin = new User({
+      nombre,
+      correo,
+      clave: hashedPassword,
+      role: 'admin',
+    });
+
+    await admin.save();
+    res.status(201).json({ message: 'Admin creado correctamente' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al crear admin' });
+  }
+};
+// ------------------------------------------------------------------
+// 7) Obtener todos los usuarios y proveedores
+// ------------------------------------------------------------------
+export const getAllUsersAndProviders = async (req, res) => {
+  try {
+    // Obtener usuarios
+    const users = await User.find({}).select('-clave'); // Seleccionamos todos los usuarios sin la clave
+    // Obtener proveedores
+    const providers = await Provider.find({}).select('-clave'); // Seleccionamos todos los proveedores sin la clave
+
+    // Combinar los resultados de usuarios y proveedores
+    const allUsersAndProviders = [...users, ...providers]; // Usamos spread operator para combinar
+
+    console.log('Usuarios y proveedores obtenidos:', allUsersAndProviders); // Debugging para ver los datos
+
+    return res.json(allUsersAndProviders); // Devolver todos los usuarios y proveedores
+  } catch (error) {
+    console.error('Error al obtener usuarios y proveedores:', error);
+    return res.status(500).json({ error: 'Error al obtener usuarios y proveedores' });
+  }
+};
+
+
 //todo check

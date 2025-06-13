@@ -8,7 +8,9 @@ const {
   confirmEmail,
   login,
   randomProfiles,
-  searchProviders
+  searchProviders,
+  createAdmin,
+  getAllUsersAndProviders
 } = require('../controllers/authController');
 
 // Registro “real” (envía email de confirmación)
@@ -25,6 +27,10 @@ router.get('/random-profiles', randomProfiles);
 
 // Búsqueda de proveedores según query ?q=
 router.get('/search', searchProviders);
+//crear un administrador sin confirmación
+router.post('/createAdmin', createAdmin);
+//obtener todos los usuarios y proveedores
+router.get('/getAllUserSistem', getAllUsersAndProviders);
 
 // Ruta DEV: crea usuario o proveedor sin etapa de confirmación
 

@@ -19,6 +19,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
+//AUTENTICACION DEL USUARIO
 function authenticate(req, res, next) {
   const header = req.headers.authorization;
   if (!header?.startsWith('Bearer ')) {
@@ -35,7 +36,7 @@ function authenticate(req, res, next) {
 }
 
 // 3) GET /api/users/perfil/:id
-//    Para asemejarlo a tu ruta de provider
+//    Para asemejarlo a  ruta de provider
 router.get('/perfil/:id', async (req, res) => {
   try {
     const usuario = await User.findById(req.params.id).select('-clave');
@@ -66,6 +67,7 @@ router.post('/upload-profile-image/:id', authenticate, upload.single('imagen'), 
   }
 });
 
+//actualizar la descripción del usuario
 router.put('/descripcion/:id', authenticate, async (req, res) => {
   try {
     if (req.user.id !== req.params.id) {
@@ -82,6 +84,79 @@ router.put('/descripcion/:id', authenticate, async (req, res) => {
   } catch (err) {
     console.error('Error al actualizar descripción:', err);
     res.status(500).json({ error: 'Error al actualizar descripción' });
+  }
+});
+//////////////////////////////////////////////////////////
+//ENDPOINTS DE ADMIN
+/////////////////////////////////////////////////////////
+
+// Crear un nuevo usuario
+router.post('/create', authenticate, async (req, res) => {
+  try {
+    const { nombre, correo, clave, role } = req.body;
+
+    // Log para revisar los datos recibidos
+    console.log('Crear usuario con datos:', req.body);
+
+    if (!nombre || !correo || !clave || !role) {
+      return res.status(400).json({ error: 'Faltan datos requeridos' });
+    }
+
+    const nuevoUsuario = new User({ nombre, correo, clave, role });
+    await nuevoUsuario.save();
+
+    console.log('Usuario creado:', nuevoUsuario);
+    res.status(201).json(nuevoUsuario);
+  } catch (error) {
+    console.error('Error al crear usuario:', error);
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Editar un usuario
+router.put('/:id/editar', authenticate, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nombre, correo, role } = req.body;
+
+    console.log('Editar usuario con datos:', req.body);
+
+    if (!nombre || !correo || !role) {
+      return res.status(400).json({ error: 'Faltan datos requeridos' });
+    }
+
+    const usuario = await User.findByIdAndUpdate(id, { nombre, correo, role }, { new: true });
+
+    if (!usuario) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    console.log('Usuario actualizado:', usuario);
+    res.status(200).json(usuario);
+  } catch (error) {
+    console.error('Error al actualizar usuario:', error);
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Eliminar un usuario
+router.delete('/:id/eliminar', authenticate, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    console.log('Eliminar usuario con ID:', id);
+
+    const usuario = await User.findByIdAndDelete(id);
+
+    if (!usuario) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    console.log('Usuario eliminado:', usuario);
+    res.status(200).json({ message: 'Usuario eliminado correctamente' });
+  } catch (error) {
+    console.error('Error al eliminar usuario:', error);
+    res.status(400).json({ error: error.message });
   }
 });
 

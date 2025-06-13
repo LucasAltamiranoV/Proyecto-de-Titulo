@@ -103,7 +103,7 @@ export async function agregarEvento(id, evento, token) {
     console.error('Error al agregar evento:', data.error);
   }
 }
-// services/providerService.js
+// services/providerService.js OBTENEMOS EVENTOS DEL PROVEEDOR
 export const getProviderEvents = async (providerId, token) => {
   try {
     const response = await fetch(`${API_URL}/${providerId}/events`, {
