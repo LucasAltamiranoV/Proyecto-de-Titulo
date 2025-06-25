@@ -3,5 +3,5 @@ src/
 ├── components/        # Reutilizables: navbar, botones, etc.
 ├── routes/            # Rutas principales
 ├── services/          # Funciones que llaman al backend (API)
-├── context/           # Autenticación, sesión, etc. (si usas Context API)
+├── context/           # Autenticación, sesión, etc. 
 ├── assets/            # Imágenes, íconos, estilos personalizados
