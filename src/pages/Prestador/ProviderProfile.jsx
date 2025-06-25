@@ -1,17 +1,26 @@
 import React, { useEffect, useState, useContext } from 'react';  
 import axios from 'axios';
-import { Container, Row, Col, Spinner, Button } from 'react-bootstrap';
+import {
+  Container,
+  Row,
+  Col,
+  Spinner,
+  Button,
+  Form,
+  Image
+} from 'react-bootstrap';
 import { AuthContext } from '../../context/AuthContext';
 import ProfileCard from '../../components/ProfileCard';
 import Calendar from '../../components/PrestadorServicio/Calendar';
 import EventRequestTable from '../../components/PrestadorServicio/EventRequestTable';
-import { getProviderProfile, getProviderEventRequests, acceptEventRequest, rejectEventRequest, uploadAvatar, updateDescription, agregarEvento } from '../../services/providerService'; 
+import { getProviderProfile, getProviderEventRequests, acceptEventRequest, rejectEventRequest, uploadAvatar, updateDescription, agregarEvento, uploadGalleryImage  } from '../../services/providerService'; 
 
 export default function MiPerfilProvider() {
   const { user, token } = useContext(AuthContext);
   const [providerData, setProviderData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [imageFile, setImageFile] = useState(null);
+   const [galleryFile, setGalleryFile] = useState(null); // archivo para galería
   const [eventRequests, setEventRequests] = useState([]);  // Estado para almacenar las solicitudes de eventos
 
   // Carga inicial del perfil
@@ -36,6 +45,21 @@ export default function MiPerfilProvider() {
     };
     fetchProfile();
   }, [user, token]);
+    //subir a la galería
+    const handleGalleryChange = e => {
+    setGalleryFile(e.target.files[0]);
+  };
+
+    const handleUploadGallery = async () => {
+    if (!galleryFile) return;
+    try {
+      const galeriaActualizada = await uploadGalleryImage(user._id, token, galleryFile);
+      setProviderData(prev => ({ ...prev, galeria: galeriaActualizada }));
+      setGalleryFile(null);
+    } catch (err) {
+      console.error('Error al subir imagen de galería:', err);
+    }
+  };
 
   // Función para manejar la aceptación de una solicitud
   const handleAcceptRequest = async (request) => {
@@ -171,6 +195,29 @@ export default function MiPerfilProvider() {
               initialEvents={providerData.eventos}
             />
           </div>
+
+                    {/* Galería */}
+          <div className="mt-4">
+            <h5>Galería de trabajos</h5>
+            <div className="d-flex flex-wrap gap-2 mb-2">
+              {providerData.galeria.map((url, idx) => (
+                <Image
+                  key={idx}
+                  src={`http://localhost:4000${url}`}
+                  thumbnail
+                  style={{ width: 100, height: 100, objectFit: 'cover' }}
+                />
+              ))}
+            </div>
+            <Form.Group controlId="formGalleryUpload" className="d-flex gap-2">
+              <Form.Control type="file" accept="image/*" onChange={handleGalleryChange} />
+              <Button onClick={handleUploadGallery} disabled={!galleryFile}>
+                Subir a Galería
+              </Button>
+            </Form.Group>
+          </div>
+          
+          
         </Col>
       </Row>
 

@@ -138,27 +138,28 @@ const handleRating = async (rating) => {
             {provider.descripcion || 'El proveedor no ha añadido descripción.'}
           </p>
         </div>
-
-        <div className="perfil-galeria d-flex flex-wrap gap-2 mt-3">
-          {provider.galeria && provider.galeria.length > 0 ? (
-            provider.galeria.map((url, idx) => (
-              <div
-                key={idx}
-                className="galeria-imagen"
-                style={{ width: '100px', height: '100px' }}
-              >
-                <img
-                  src={url}
-                  alt={`Galería ${idx + 1}`}
-                  className="img-fluid rounded"
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
-              </div>
-            ))
-          ) : (
-            <p className="text-muted">No hay fotos de galería.</p>
-          )}
-        </div>
+      </div>
+      {/* Galería */}
+      <h5>Galería de trabajos</h5>
+      <div className="perfil-galeria d-flex flex-wrap gap-2 mt-4">
+        {provider.galeria && provider.galeria.length > 0 ? (
+          provider.galeria.map((url, idx) => (
+            <div
+              key={idx}
+              className="galeria-imagen"
+              style={{ width: '100px', height: '100px' }}
+            >
+              <img
+                src={`http://localhost:4000${url}`}
+                alt={`Galería ${idx + 1}`}
+                className="img-fluid rounded"
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            </div>
+          ))
+        ) : (
+          <p className="text-muted">No hay fotos de galería.</p>
+        )}
       </div>
 
       <div className="mt-5">

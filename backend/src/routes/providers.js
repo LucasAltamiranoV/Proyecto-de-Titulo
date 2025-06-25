@@ -151,21 +151,34 @@ router.post('/:id/avatar', authenticate, upload.single('imagen'), async (req, re
 // POST /api/providers/:id/gallery
 //    Sube una imagen a la galería del proveedor
 // ------------------------------------------------------------------
-router.post('/:id/gallery', authenticate, upload.single('imagen'), async (req, res) => {
-  try {
-    if (req.user.id !== req.params.id) {
-      return res.status(403).json({ error: 'No autorizado' });
+router.post(
+  '/:id/gallery',
+  authenticate,
+  upload.single('imagen'),
+  async (req, res) => {
+    try {
+      // Sólo el propio proveedor puede añadir a su galería
+      if (req.user.id !== req.params.id) {
+        return res.status(403).json({ error: 'No autorizado' });
+      }
+
+      const provider = await Provider.findById(req.params.id);
+      if (!provider) {
+        return res.status(404).json({ error: 'Proveedor no encontrado' });
+      }
+
+      // Guardamos la ruta en el array galeria
+      const url = `/uploads/${req.file.filename}`;
+      provider.galeria.push(url);
+      await provider.save();
+
+      return res.json({ galeria: provider.galeria });
+    } catch (err) {
+      console.error('Error al subir foto de galería:', err);
+      return res.status(500).json({ error: 'Error al subir foto de galería' });
     }
-    const provider = await Provider.findById(req.params.id);
-    if (!provider) return res.status(404).json({ error: 'Proveedor no encontrado' });
-    provider.galeria.push(`/uploads/${req.file.filename}`);
-    await provider.save();
-    res.json({ galeria: provider.galeria });
-  } catch (err) {
-    console.error('Error al subir foto de galería:', err);
-    res.status(500).json({ error: 'Error al subir foto de galería' });
   }
-});
+);
 
 // ------------------------------------------------------------------
 // 6) POST /api/providers/:id/eventos

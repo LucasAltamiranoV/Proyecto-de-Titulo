@@ -5,6 +5,13 @@ import CardPrestadorPerfil from './PrestadorServicio/CardPrestadorPerfil';
 import { AuthContext } from '../context/AuthContext';
 import {Valoracion} from './PrestadorServicio/Valoracion';
 
+    // Función para calcular promedio
+export const calcularPromedio = (valoraciones = []) => {
+    if (!valoraciones.length) return 0;
+    const suma = valoraciones.reduce((acc, v) => acc + (v.calificacion || 0), 0);
+    return suma / valoraciones.length;
+  };
+
 const PerfilesDestacados = () => {
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -49,12 +56,6 @@ const PerfilesDestacados = () => {
       contactoModel: 'Provider'
     };
     navigate('/inbox', { state: { contacto } });
-  };
-    // Función para calcular promedio
-  const calcularPromedio = (valoraciones = []) => {
-    if (!valoraciones.length) return 0;
-    const suma = valoraciones.reduce((acc, v) => acc + (v.calificacion || 0), 0);
-    return suma / valoraciones.length;
   };
 
   return (

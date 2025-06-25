@@ -33,25 +33,6 @@ export const uploadAvatar = async (id, token, file) => {
   }
 };
 
-
-// Sube imágenes a la galería
-export const uploadGalleryImage = async (id, token, file) => {
-  const formData = new FormData();
-  formData.append('imagen', file);
-  try {
-    const res = await axios.post(`${API_URL}/${id}/gallery`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return res.data;
-  } catch (error) {
-    console.error('Error al subir foto de galería:', error);
-    throw new Error('No se pudo subir la foto de la galería');
-  }
-};
-
 // Califica al proveedor
 export const rateProvider = async (providerId, userId, token, rating) => {
   try {
@@ -211,3 +192,22 @@ export const getProviderEventRequests = async (providerId, token) => {
     throw new Error('No se pudieron obtener las solicitudes de eventos');
   }
 };
+
+
+export async function uploadGalleryImage(providerId, token, file) {
+  const formData = new FormData();
+  formData.append('imagen', file);
+
+  const res = await axios.post(
+    `http://localhost:4000/api/providers/${providerId}/gallery`,
+    formData,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${token}`
+      }
+    }
+  );
+  // devuelve el array completo actualizado
+  return res.data.galeria;
+}

@@ -1,21 +1,24 @@
 // src/pages/SearchServices.jsx
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import BarraDeBusqueda from '../../components/BarraDeBusqueda';
 import FilterButton from '../../components/FiltroBusqueda';
 import CardPrestadorPerfil from '../../components/PrestadorServicio/CardPrestadorPerfil';
+import { Valoracion } from '../../components/PrestadorServicio/Valoracion';
+import { calcularPromedio } from '../../components/RenderizarPerfilesdestacados';
 import axios from 'axios';
 
-function SearchServices() {
-  const [results, setResults]   = useState([]);
-  const [loading, setLoading]   = useState(false);
-  const [error, setError]       = useState(null);
-  const [term, setTerm]         = useState('');
-  const [region, setRegion]     = useState(null);
-  const navigate                = useNavigate();
+export default function SearchServices() {
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error,   setError]   = useState(null);
+  const [term,    setTerm]    = useState('');
+  const [region,  setRegion]  = useState(null);
+
+  const navigate = useNavigate();
   const location = useLocation();
 
-  // Función única que ejecuta la búsqueda
+  // Lanza la búsqueda al backend
   const performSearch = async (newTerm, newRegion) => {
     const q = [newTerm.trim(), newRegion].filter(Boolean).join(' ');
     if (!q) {
@@ -40,30 +43,33 @@ function SearchServices() {
     }
   };
 
+  // Si llegan parámetros ?q=… por URL, pre-cargamos la búsqueda
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const qParam = params.get('q') || '';
     setTerm(qParam);
     performSearch(qParam, region);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.search]);
 
-  // Handlers que actualizan estado y llaman al servicio único
-  const handleSearch = (newTerm) => {
+  // Handlers de input y filtro
+  const handleSearch = newTerm => {
     setTerm(newTerm);
     performSearch(newTerm, region);
   };
 
-  const handleFilter = (newRegion) => {
+  const handleFilter = newRegion => {
     setRegion(newRegion);
     performSearch(term, newRegion);
   };
 
-  const handleViewProfile = (id) =>
-    navigate(`/provider/detalle/${id}`);
+  const handleVerPerfil = profile =>
+    navigate(`/provider/detalle/${profile._id}`);
 
   return (
     <div className="container mt-5">
       <h1 className="text-center mb-4">Buscar Prestadores</h1>
+
       <div className="d-flex flex-wrap align-items-center justify-content-center gap-2 mb-4">
         <BarraDeBusqueda onSearch={handleSearch} />
         <FilterButton region={region} onFilter={handleFilter} />
@@ -81,6 +87,9 @@ function SearchServices() {
             ? `http://localhost:4000${profile.imagenUrl}`
             : '/default-avatar.png';
 
+          // Calculamos la valoración promedio de este perfil
+          const avgRating = calcularPromedio(profile.valoraciones || []);
+
           return (
             <div className="col-6 col-md-3 mb-3" key={profile._id}>
               <CardPrestadorPerfil
@@ -93,8 +102,12 @@ function SearchServices() {
                 colorBarra="#bd4fca"
                 colorEtiqueta="#f5a623"
                 clickable
-                onClick={() => handleViewProfile(profile._id)}
+                onClick={() => handleVerPerfil(profile)}
               />
+              <div className="text-center mt-2">
+                <Valoracion rating={avgRating} maxRating={5} readOnly />
+                <span> ({avgRating.toFixed(1)})</span>
+              </div>
             </div>
           );
         })}
@@ -102,5 +115,3 @@ function SearchServices() {
     </div>
   );
 }
-
-export default SearchServices;
