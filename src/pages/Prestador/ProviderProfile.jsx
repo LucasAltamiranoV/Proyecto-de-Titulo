@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';  
+import axios from 'axios';
 import { Container, Row, Col, Spinner, Button } from 'react-bootstrap';
 import { AuthContext } from '../../context/AuthContext';
 import ProfileCard from '../../components/ProfileCard';
@@ -51,6 +52,15 @@ export default function MiPerfilProvider() {
 
         // Llamar a la función para agregar el evento al calendario
         await agregarEvento(user._id, newEvent, token);
+
+            // 3) Envías el mensaje automático al cliente
+        await axios.post('http://localhost:4000/api/chat/enviar', {
+          emisorId:   user._id,             // quien envía: el proveedor
+          emisorModel:'Provider',
+          receptorId: request.clienteId,    // suponiendo que request.clienteId existe
+          receptorModel: 'User',
+          contenido:  `Tu solicitud de evento "${request.titulo}" para ${new Date(request.inicio).toLocaleString()} ha sido aceptada.`
+        });
 
         // Eliminar la solicitud aceptada de la tabla
         setEventRequests((prevRequests) =>
