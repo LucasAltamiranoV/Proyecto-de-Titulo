@@ -1,0 +1,46 @@
+.about-us-container {
+  min-height: 100vh;
+  padding: 3rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f9fafb;
+}
+
+.about-us-content {
+  max-width: 900px;
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.about-us-title {
+  font-size: 2.5rem;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #1f2937;
+}
+
+.about-us-paragraph {
+  font-size: 1.125rem;
+  line-height: 1.75;
+  color: #374151;
+  margin-bottom: 1.25rem;
+  text-align: justify;
+}
+
+/* Responsividad */
+@media (max-width: 768px) {
+  .about-us-title {
+    font-size: 2rem;
+  }
+
+  .about-us-paragraph {
+    font-size: 1rem;
+  }
+
+  .about-us-content {
+    padding: 1.5rem;
+  }
+}

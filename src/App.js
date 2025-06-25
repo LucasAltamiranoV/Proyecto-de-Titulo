@@ -49,6 +49,7 @@ import ConfirmarCuenta from './pages/All/ConfirmarCuenta';
 import { AuthProvider } from './context/AuthContext';
 import LoginPageWrapper from './pages/All/LoginPageWrapper'
 import Inbox from './pages/All/Inbox'
+import AboutUs from './pages/All/AboutUs';
 
 
 function App() {
@@ -65,6 +66,7 @@ function App() {
             {/* Rutas generales */}
             <Route path="/" element={<LoginPageWrapper/>} />
             <Route path="/home" element={<Home />} />
+            <Route path="/About" element={<AboutUs />} />
             <Route path="/search" element={<SearchServices />} />
             <Route path="/soporte" element={<Soporte />} />
             <Route path="/reporte-enviado" element={<ConfirmacionSoporte />} />

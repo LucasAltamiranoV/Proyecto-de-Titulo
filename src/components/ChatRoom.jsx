@@ -57,8 +57,8 @@ export default function ChatRoom({ miUsuario, otroUsuario }) {
     if (!miUsuario?._id || !otroUsuario?._id) return;
     const miModel   = deriveModel(miUsuario);
     const otroModel = deriveModel(otroUsuario);
-    const url = `/api/chat/conversacion/${miUsuario._id}/${miModel}/${otroUsuario._id}/${otroModel}`;
-    axios.get(url)
+    //const url = `/api/chat/conversacion/${miUsuario._id}/${miModel}/${otroUsuario._id}/${otroModel}`;
+    axios.get(`http://localhost:4000/api/chat/conversacion/${miUsuario._id}/${miModel}/${otroUsuario._id}/${otroModel}`)
       .then(res => setMensajes(res.data))
       .catch(err => console.error('Error cargando historial:', err));
   }, [miUsuario, otroUsuario]);

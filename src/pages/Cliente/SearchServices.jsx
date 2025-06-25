@@ -1,7 +1,6 @@
-
 // src/pages/SearchServices.jsx
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import BarraDeBusqueda from '../../components/BarraDeBusqueda';
 import FilterButton from '../../components/FiltroBusqueda';
 import CardPrestadorPerfil from '../../components/PrestadorServicio/CardPrestadorPerfil';
@@ -14,14 +13,12 @@ function SearchServices() {
   const [term, setTerm]         = useState('');
   const [region, setRegion]     = useState(null);
   const navigate                = useNavigate();
+  const location = useLocation();
 
-  // Dispara búsqueda con término y/o región
-  useEffect(() => {
-    // Construir query con ambos valores
-    const q = [term, region].filter(Boolean).join(' ').trim();
-
-    // Si no hay ni término ni región, limpiar resultados
-    if (!term && !region) {
+  // Función única que ejecuta la búsqueda
+  const performSearch = async (newTerm, newRegion) => {
+    const q = [newTerm.trim(), newRegion].filter(Boolean).join(' ');
+    if (!q) {
       setResults([]);
       return;
     }
@@ -29,24 +26,40 @@ function SearchServices() {
     setLoading(true);
     setError(null);
 
-    axios
-      .get(`http://localhost:4000/api/auth/search?q=${encodeURIComponent(q)}`)
-      .then(res => setResults(res.data))
-      .catch(err => {
-        console.error('Error al buscar proveedores:', err);
-        setError('Hubo un error al buscar. Intenta nuevamente.');
-        setResults([]);
-      })
-      .finally(() => setLoading(false));
-  }, [term, region]);
+    try {
+      const { data } = await axios.get(
+        `http://localhost:4000/api/auth/search?q=${encodeURIComponent(q)}`
+      );
+      setResults(data);
+    } catch (err) {
+      console.error('Error al buscar proveedores:', err);
+      setError('Hubo un error al buscar. Intenta nuevamente.');
+      setResults([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // Cuando el usuario escribe en la barra
-  const handleSearch = q => setTerm(q);
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const qParam = params.get('q') || '';
+    setTerm(qParam);
+    performSearch(qParam, region);
+  }, [location.search]);
 
-  // Cuando el usuario selecciona/quita región
-  const handleFilter = r => setRegion(r);
+  // Handlers que actualizan estado y llaman al servicio único
+  const handleSearch = (newTerm) => {
+    setTerm(newTerm);
+    performSearch(newTerm, region);
+  };
 
-  const handleViewProfile = id => navigate(`/provider/detalle/${id}`);
+  const handleFilter = (newRegion) => {
+    setRegion(newRegion);
+    performSearch(term, newRegion);
+  };
+
+  const handleViewProfile = (id) =>
+    navigate(`/provider/detalle/${id}`);
 
   return (
     <div className="container mt-5">

@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@fullcalendar/common": "^5.11.5",
+    "proxy": "http://localhost:4000",
     "@fullcalendar/core": "^6.1.17",
     "@fullcalendar/daygrid": "^6.1.17",
     "@fullcalendar/interaction": "^6.1.17",

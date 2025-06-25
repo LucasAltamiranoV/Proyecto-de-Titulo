@@ -29,7 +29,7 @@ export default function Inbox() {
     const fetchContacts = async () => {
       try {
         const res = await axios.get(
-          `/api/chat/ultimos/${user._id}/${user.accountType}`
+          `http://localhost:4000/api/chat/ultimos/${user._id}/${user.accountType}`
         );
 
         const resultados = await Promise.all(
@@ -38,8 +38,8 @@ export default function Inbox() {
             // Ajustamos la URL de detalle
             const perfilUrl =
               contactoModel === 'Provider'
-                ? `/api/providers/detalle/${contactoId}`
-                : `/api/users/perfil/${contactoId}`;
+                ? `http://localhost:4000/api/providers/detalle/${contactoId}`
+                : `http://localhost:4000/api/users/perfil/${contactoId}`;
 
             let nombre = 'Sin nombre';
             try {

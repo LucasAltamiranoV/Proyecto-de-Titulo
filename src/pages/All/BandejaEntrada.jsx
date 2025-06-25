@@ -16,7 +16,7 @@ export default function BandejaEntrada() {
     const fetchConversaciones = async () => {
       try {
         const res = await axios.get(
-          `/api/chat/ultimos/${user._id}/${user.accountType}`
+          `http://localhost:4000/api/chat/ultimos/${user._id}/${user.accountType}`
         );
 
         const resultados = await Promise.all(
@@ -25,8 +25,8 @@ export default function BandejaEntrada() {
             // Ajustamos la ruta de perfil
             const urlPerfil =
               contactoModel === 'User'
-                ? `/api/users/perfil/${contactoId}`
-                : `/api/providers/detalle/${contactoId}`;
+              ? `http://localhost:4000/api/users/perfil/${contactoId}`
+              : `http://localhost:4000/api/providers/detalle/${contactoId}`;
 
             let nombre = 'Sin nombre';
             let imagen = imagenPerfil; // Imagen predeterminada en caso de error
