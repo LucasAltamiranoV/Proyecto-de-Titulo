@@ -1,7 +1,10 @@
 // src/components/ChatRoom.jsx
-import React, { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useContext  } from 'react';
 import io from 'socket.io-client';
 import axios from 'axios';
+import { Valoracion } from './PrestadorServicio/Valoracion';
+import { rateProvider } from '../services/providerService'; 
+import { AuthContext } from '../context/AuthContext';
 
 /**
  * Deriva el modelo ('User' o 'Provider') a partir de la información
@@ -18,6 +21,9 @@ function deriveModel(user) {
 export default function ChatRoom({ miUsuario, otroUsuario }) {
   const [mensajes, setMensajes] = useState([]);
   const [texto, setTexto] = useState('');
+  const { user, token } = useContext(AuthContext);  
+  const [calificaciones, setCalificaciones] = useState({});
+const [mensajeAlerta, setMensajeAlerta] = useState(null);
   const socketRef = useRef(null);
 
   useEffect(() => {
@@ -93,10 +99,32 @@ export default function ChatRoom({ miUsuario, otroUsuario }) {
     ]);
     setTexto('');
   };
+const enviarCalificacion = async (rating, providerId) => {
+  try {
+    await rateProvider(providerId, user._id, token, rating);
+
+    // Guarda localmente el puntaje (evita recalificar)
+    setCalificaciones(prev => ({ ...prev, [providerId]: rating }));
+
+    // Muestra alerta de éxito por 3 segundos
+    setMensajeAlerta({ tipo: 'success', texto: '¡Gracias por tu calificación!' });
+    setTimeout(() => setMensajeAlerta(null), 3000);
+  } catch (error) {
+    console.error('Error al calificar:', error);
+    setMensajeAlerta({ tipo: 'danger', texto: 'Error al enviar la calificación.' });
+    setTimeout(() => setMensajeAlerta(null), 3000);
+  }
+};
+
 
   return (
     <div style={{ border: '1px solid #ccc', padding: 10, marginTop: 20 }}>
       <h4>
+        {mensajeAlerta && (
+          <div className={`alert alert-${mensajeAlerta.tipo} mt-2`} role="alert">
+            {mensajeAlerta.texto}
+          </div>
+        )}
         {miUsuario.nombre} ({deriveModel(miUsuario)}) ↔ {otroUsuario.nombre} ({deriveModel(otroUsuario)})
       </h4>
       <div style={{
@@ -123,7 +151,24 @@ export default function ChatRoom({ miUsuario, otroUsuario }) {
                 borderRadius: 8,
                 maxWidth: '80%'
               }}>
-                <div>{m.contenido}</div>
+                <div>
+                  {m.tipo === 'calificacion' ? (
+                    <div>
+                      <div>{m.contenido}</div>
+                      <Valoracion
+                        currentUserId={user._id}
+                        providerId={m.providerId}
+                        rating={calificaciones[m.providerId] || 0}  // ← Mostrar rating si ya calificó
+                        readOnly={!!calificaciones[m.providerId]}   // ← Bloquear después de calificar
+                        onRate={(puntaje) => enviarCalificacion(puntaje, m.providerId)}
+                      />
+                    </div>
+                  ) : (
+                    <div>{m.contenido}</div>
+                  )}
+
+                </div>
+
                 <small style={{ fontSize: '0.7rem', color: '#555' }}>
                   {new Date(m.enviadoEn).toLocaleTimeString()}
                 </small>

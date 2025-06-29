@@ -5,7 +5,8 @@ import {Valoracion} from '../../components/PrestadorServicio/Valoracion';
 import { FaMapMarkerAlt } from 'react-icons/fa';
 import { AuthContext } from '../../context/AuthContext';
 import Calendar from '../../components/PrestadorServicio/Calendar';
-import { rateProvider } from '../../services/providerService';  // Ajusta la ruta si es necesario
+import { rateProvider } from '../../services/providerService';  
+import { calcularPromedio } from '../../components/RenderizarPerfilesdestacados';
 import '../../styles/PageStyles/DetailProvider.css';
 
  function deriveModel(user) {
@@ -22,24 +23,7 @@ export default function DetailProvider() {
   const { user, token } = useContext(AuthContext); // obtener correctamente el usuario desde AuthContext
   const [provider, setProvider] = useState(null);
   const [loading, setLoading] = useState(true);
-  
-const handleRating = async (rating) => {
-  try {
-    console.log('Intentando calificar con rating:', rating);
 
-    // Llamar a la función para agregar la valoración
-    const response = await rateProvider(provider._id, user._id, token, rating);
-    console.log('Valoración agregada con éxito:', response);
-
-    // Actualizar la calificación promedio del proveedor
-    setProvider(prevProvider => ({
-      ...prevProvider,
-      calificacion: response.promedio  // Asegúrate de que el backend te devuelva el promedio actualizado
-    }));
-  } catch (error) {
-    console.error('Error al calificar al proveedor:', error);
-  }
-};
 
 
 
@@ -94,7 +78,7 @@ const handleRating = async (rating) => {
   }
 
     const imageUrl = provider.imagenUrl ? `http://localhost:4000${provider.imagenUrl}` : '/default-avatar.png';  // Reemplaza con la URL base del servidor
-
+    const avgRating = calcularPromedio(provider.valoraciones);
   return (
     <div className="container mt-5">
       <div className="perfil-top d-flex flex-wrap">
@@ -105,16 +89,10 @@ const handleRating = async (rating) => {
             </div>
           )}
 
-          <div className="perfil-valoracion mb-3">
-            <Valoracion
-              rating={provider.calificacion}  // Calificación inicial del proveedor
-              currentUserId={user._id}  // ID del usuario que está calificado
-              providerId={provider._id}  // ID del proveedor que está siendo calificado
-              onRate={handleRating}  // Llama la función `handleRating` cuando el usuario califique
-            />
-
-
-          </div>
+        <div className="text-center mt-2">
+          <Valoracion rating={avgRating} maxRating={5} readOnly />
+          <span>({avgRating.toFixed(1)})</span>
+        </div>
 
 
           <div className="perfil-ubicacion d-flex align-items-center mb-3">

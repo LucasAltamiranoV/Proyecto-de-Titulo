@@ -1,4 +1,3 @@
-// src/pages/All/BandejaEntrada.jsx
 
 import React, { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../../context/AuthContext';

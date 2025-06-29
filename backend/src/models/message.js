@@ -23,6 +23,8 @@ const messageSchema = new mongoose.Schema({
     enum: ['User', 'Provider']
   },
   contenido: { type: String, required: true },
+  tipo: { type: String, enum: ['texto', 'calificacion'], default: 'texto' },  // ← Nuevo campo
+  providerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Provider' },  
   enviadoEn: { type: Date, default: Date.now }
 });
 

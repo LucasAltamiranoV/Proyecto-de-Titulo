@@ -1,10 +1,13 @@
 // src/routes/users.js
+const mongoose = require('mongoose');
 const express = require('express');
 const multer  = require('multer');
 const path    = require('path');
 const fs      = require('fs');
 const User    = require('../models/user');
 const jwt     = require('jsonwebtoken');
+const Provider = require('../models/Provider');
+const Message = require('../models/Message');
 
 const router = express.Router();
 
@@ -146,18 +149,39 @@ router.delete('/:id/eliminar', authenticate, async (req, res) => {
 
     console.log('Eliminar usuario con ID:', id);
 
+    // 1. Eliminar usuario
     const usuario = await User.findByIdAndDelete(id);
-
     if (!usuario) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
-    console.log('Usuario eliminado:', usuario);
-    res.status(200).json({ message: 'Usuario eliminado correctamente' });
+    // 2. Eliminar todos los mensajes donde sea emisor o receptor
+    await Message.deleteMany({
+      $or: [
+        { emisor: id, emisorModel: 'User' },
+        { receptor: id, receptorModel: 'User' }
+      ]
+    });
+
+    // 3. Eliminar reservas confirmadas (eventos)
+    //    Usar ObjectId porque tu esquema eventos.clienteId es ObjectId
+    const userObjectId = new mongoose.Types.ObjectId(id);
+    await Provider.updateMany(
+      {},
+      { $pull: { eventos: { clienteId: userObjectId } } }
+    );
+
+    // 4. Eliminar solicitudes pendientes (si tus eventRequests.clienteId es String)
+    await Provider.updateMany(
+      {},
+      { $pull: { eventRequests: { clienteId: id } } }
+    );
+
+    console.log('Usuario y datos relacionados eliminados.');
+    return res.status(200).json({ message: 'Usuario y sus datos eliminados correctamente' });
   } catch (error) {
     console.error('Error al eliminar usuario:', error);
-    res.status(400).json({ error: error.message });
+    return res.status(400).json({ error: error.message });
   }
 });
-
 module.exports = router;

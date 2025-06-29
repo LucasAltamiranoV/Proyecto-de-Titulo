@@ -184,38 +184,34 @@ router.post(
 // 6) POST /api/providers/:id/eventos
 //    Agrega un evento al proveedor
 // ------------------------------------------------------------------
+
 router.post('/:id/eventos', authenticate, async (req, res) => {
   try {
-    // Verificar si el proveedor existe
     const proveedor = await Provider.findById(req.params.id);
     if (!proveedor) {
       return res.status(404).json({ error: 'Proveedor no encontrado' });
     }
 
-    // Verificar que el proveedor sea el mismo que está haciendo la solicitud
     if (req.user.id !== proveedor.id) {
       return res.status(403).json({ error: 'No autorizado a modificar este proveedor' });
     }
 
-    // Crear el nuevo evento a partir de los datos enviados en el cuerpo de la solicitud
-    const { titulo, inicio, fin, todoElDia } = req.body;
+    // Extraemos clienteId junto al resto
+    const { titulo, inicio, fin, todoElDia, clienteId } = req.body;
 
-    // Validar la entrada de datos
-    if (!titulo || !inicio || !fin) {
+    if (!titulo || !inicio || !fin || !clienteId) {
       return res.status(400).json({ error: 'Faltan datos necesarios para crear el evento' });
     }
 
-    // Crear el evento y agregarlo al proveedor
-      const nuevoEvento = {
-        titulo,
-        inicio: new Date(inicio).toISOString(),  // Asegúrate de que la fecha esté en UTC
-        fin: new Date(fin).toISOString(),        // Asegúrate de que la fecha esté en UTC
-        todoElDia: todoElDia || false,
-      };
+    const nuevoEvento = {
+      titulo,
+      inicio: new Date(inicio).toISOString(),
+      fin:    new Date(fin).toISOString(),
+      todoElDia: todoElDia || false,
+      clienteId // ← aquí se guarda como String
+    };
 
-    proveedor.eventos.push(nuevoEvento); // Agregar el evento al arreglo de eventos del proveedor
-
-    // Guardar el proveedor con el nuevo evento
+    proveedor.eventos.push(nuevoEvento);
     await proveedor.save();
 
     res.status(200).json({ success: 'Evento agregado con éxito', eventos: proveedor.eventos });
@@ -224,6 +220,7 @@ router.post('/:id/eventos', authenticate, async (req, res) => {
     res.status(500).json({ error: 'Error al agregar el evento' });
   }
 });
+
 
 // obtenemos los eventos de un proveedor por su ID
 router.get('/:id/events', authenticate, async (req, res) => {
@@ -269,6 +266,7 @@ router.post('/:id/events/accept', authenticate, async (req, res) => {
     res.status(500).json({ error: 'Error al aceptar la solicitud de evento' });
   }
 });
+
 
 
 //rechazar evento
@@ -319,9 +317,16 @@ router.get('/:id/eventos/solicitudes', authenticate, async (req, res) => {
 // Endpoint para crear una solicitud de evento
 router.post('/eventos/solicitar', async (req, res) => {
   try {
-    const { titulo, proveedorId, clienteId, clienteNombre, inicio, fin, todoElDia } = req.body;
+    const {
+      titulo,
+      proveedorId,
+      clienteId,
+      clienteNombre,
+      inicio,
+      fin,
+      todoElDia
+    } = req.body;
 
-    
     console.log('Datos recibidos:', {
       titulo,
       proveedorId,
@@ -331,26 +336,22 @@ router.post('/eventos/solicitar', async (req, res) => {
       fin,
       todoElDia
     });
-  
 
-    // Buscar al proveedor en la base de datos
     const proveedor = await Provider.findById(proveedorId);
     if (!proveedor) {
       return res.status(404).json({ error: 'Proveedor no encontrado :/' });
     }
 
-    // Crear la solicitud de evento
     const eventRequest = {
       titulo,
       clienteId,
       clienteNombre,
-      inicio: new Date(inicio), // Convierte la fecha de inicio a tipo Date
-      fin: new Date(fin),       // Convierte la fecha de fin a tipo Date
+      inicio: new Date(inicio),
+      fin: new Date(fin),
       todoElDia: todoElDia || false,
-      status: 'pendiente',  // Inicialmente está pendiente
+      status: 'pendiente'
     };
 
-    // Agregar la solicitud de evento en la lista de solicitudes del proveedor
     proveedor.eventRequests.push(eventRequest);
     await proveedor.save();
 

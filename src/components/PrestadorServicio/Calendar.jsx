@@ -12,8 +12,6 @@ export default function Calendar(props) {
   const [currentEvents, setCurrentEvents] = useState([]);
   const [eventRequests, setEventRequests] = useState([]);
   const { user } = useContext(AuthContext);
-  const clienteId = user?._id;
-  const clienteNombre = user?.nombre;
   const accountType = user?.accountType || 'User';
   const { providerId } = props;
 
@@ -24,35 +22,38 @@ export default function Calendar(props) {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
 
+
   useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const events = await getProviderEvents(providerId, token);
-        const formattedEvents = events.map(event => ({
-          title: event.titulo,
-          start: event.inicio,
-          end: event.fin,
-          allDay: event.todoElDia,
-          backgroundColor: 'green',
-        }));
-        setCurrentEvents(formattedEvents);
-
-        const requests = await getProviderEventRequests(providerId, token);
-        const formattedRequests = requests.map(req => ({
-          title: `Solicitud: ${req.clienteNombre}`,
-          start: req.fecha,
-          allDay: true,
-          backgroundColor: 'yellow',
-        }));
-        setEventRequests(formattedRequests);
-      } catch (error) {
-        console.error('Error al obtener los eventos o solicitudes:', error);
-      }
-    };
-
-    fetchEvents();
+    fetchAll();
   }, [providerId]);
+
+  const fetchAll = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      // Eventos normales
+      const events = await getProviderEvents(providerId, token);
+      setCurrentEvents(events.map(e => ({
+        title: e.titulo,
+        start: e.inicio,
+        end:   e.fin,
+        allDay: e.todoElDia,
+        backgroundColor: 'green',
+      })));
+
+      // Solicitudes
+      const requests = await getProviderEventRequests(providerId, token);
+      setEventRequests(requests.map(r => ({
+        title: ` ${r.titulo}`,
+        start: r.inicio,      // ← Aquí cambiamos fecha→inicio
+        allDay: true,
+        backgroundColor: 'yellow',
+        textColor: 'black'  
+      })));
+    } catch (error) {
+      console.error('Error al obtener eventos/solicitudes:', error);
+    }
+  };
+
 
   const handleDateSelect = (selectInfo) => {
     setPendingSelectInfo(selectInfo);
@@ -60,46 +61,48 @@ export default function Calendar(props) {
     setShowModal(true);
   };
 
-  const handleModalConfirm = async () => {
-    const selectInfo = pendingSelectInfo;
-    setShowModal(false);
-    if (!modalTitle) return;
+const handleModalConfirm = async () => {
+  const selectInfo = pendingSelectInfo;
+  setShowModal(false);
+  if (!modalTitle) return;
 
-    const newEvent = {
-      titulo: modalTitle,
-      inicio: selectInfo.start.toISOString(),
-      fin: selectInfo.end.toISOString(),
-      todoElDia: selectInfo.allDay,
-    };
+  const inicio = selectInfo.start.toISOString();
+  const fin = selectInfo.end.toISOString();
+  const todoElDia = selectInfo.allDay;
 
-    try {
-      const token = localStorage.getItem('token');
-      if (accountType === 'User') {
-        await solicitarEvento(providerId, newEvent.titulo, clienteId, clienteNombre, newEvent.inicio, newEvent.fin, newEvent.todoElDia);
-        setToastMessage('Solicitud creada con éxito');
-      } else {
-        await agregarEvento(providerId, newEvent, token);
-        setToastMessage('Evento agregado con éxito');
-      }
+  try {
+    const token = localStorage.getItem('token');
 
-      setCurrentEvents(prev => [
-        ...prev,
-        {
-          title: newEvent.titulo,
-          start: newEvent.inicio,
-          end: newEvent.fin,
-          allDay: newEvent.todoElDia,
-          backgroundColor: 'green',
-        }
-      ]);
-    } catch (error) {
-      console.error('Error al agregar evento o solicitud:', error);
-      setToastMessage('Hubo un problema al agregar el evento o la solicitud');
-    } finally {
-      setShowToast(true);
-      setPendingSelectInfo(null);
+    if (accountType === 'User') {
+      await solicitarEvento(
+        providerId,
+        modalTitle,
+        user._id,
+        user.nombre,
+        inicio,
+        fin,
+        todoElDia
+      );
+      setToastMessage('Solicitud creada con éxito');
+    } else {
+      await agregarEvento(providerId, {
+        titulo: modalTitle,
+        inicio,
+        fin,
+        clienteId: user._id,
+        todoElDia
+      }, token);
+      setToastMessage('Evento agregado con éxito');
     }
-  };
+    setShowToast(true);
+    await fetchAll();
+    setModalTitle('');
+    setPendingSelectInfo(null);
+  } catch (error) {
+    console.error('Error al confirmar evento:', error);
+    setToastMessage('Error al crear evento');
+  }
+};
 
   return (
     <>

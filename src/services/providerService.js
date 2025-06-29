@@ -157,27 +157,36 @@ export const rejectEventRequest = async (providerId, requestId, token) => {
 
 
 // Función para solicitar un evento
-export const solicitarEvento = async (proveedorId, titulo, clienteId, clienteNombre, inicio, fin, todoElDia) => {
+export const solicitarEvento = async (
+  proveedorId,
+  titulo,
+  clienteId,
+  clienteNombre,
+  inicio,
+  fin,
+  todoElDia
+) => {
   try {
     const response = await axios.post(
       `${API_URL}/eventos/solicitar`,
       {
-      titulo,
-      proveedorId,
-      clienteId,
-      clienteNombre,
-      inicio,
-      fin,
-      todoElDia: todoElDia || false,
+        proveedorId,
+        titulo,
+        clienteId,
+        clienteNombre,
+        inicio,
+        fin,
+        todoElDia: todoElDia || false
       }
     );
 
-    return response.data;  // Devuelve el resultado de la solicitud
+    return response.data;
   } catch (error) {
-    console.error('Error al solicitar evento front', error);
+    console.error('Error al solicitar evento (frontend):', error);
     throw new Error('No se pudo solicitar el evento');
   }
 };
+
 
 
 // Función para obtener las solicitudes de eventos del proveedor

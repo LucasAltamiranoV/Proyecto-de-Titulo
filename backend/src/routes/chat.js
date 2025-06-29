@@ -6,7 +6,7 @@ const Message = require('../models/Message');
 
 // POST /api/chat/enviar
 router.post('/enviar', async (req, res) => {
-  const { emisorId, emisorModel, receptorId, receptorModel, contenido } = req.body;
+  const { emisorId, emisorModel, receptorId, receptorModel, contenido, tipo, providerId } = req.body;
   if (!emisorId || !emisorModel || !receptorId || !receptorModel || !contenido) {
     return res.status(400).json({ error: 'Faltan campos obligatorios' });
   }
@@ -16,7 +16,9 @@ router.post('/enviar', async (req, res) => {
       emisorModel,
       receptor: receptorId,
       receptorModel,
-      contenido
+      contenido,
+      tipo: tipo || 'texto',       // Por defecto "texto" si no viene
+      providerId: providerId || null
     });
     await mensaje.save();
     return res.status(201).json({ message: 'Mensaje enviado', mensaje });

@@ -66,12 +66,13 @@ export default function MiPerfilProvider() {
     try {
       const result = await acceptEventRequest(user._id, request._id, token);
       if (result.success) {
-        // Crear el evento con los detalles de la solicitud
         const newEvent = {
           titulo: request.titulo,
           inicio: request.inicio,  // Asumiendo que las fechas están en formato ISO
           fin: request.fin,
           todoElDia: request.todoElDia,
+          clienteId: request.clienteId
+
         };
 
         // Llamar a la función para agregar el evento al calendario
@@ -85,6 +86,16 @@ export default function MiPerfilProvider() {
           receptorModel: 'User',
           contenido:  `Tu solicitud de evento "${request.titulo}" para ${new Date(request.inicio).toLocaleString()} ha sido aceptada.`
         });
+
+        await axios.post('http://localhost:4000/api/chat/enviar', {
+          emisorId: user._id,
+          emisorModel: 'Provider',
+          receptorId: request.clienteId,
+          receptorModel: 'User',
+          contenido: `¿Cómo calificarías al proveedor por este servicio?`,
+          tipo: 'calificacion',  // Tipo especial que tu frontend puede interpretar para renderizar <Valoracion />
+          providerId: user._id   // Lo necesita el componente para saber a quién califica
+      });
 
         // Eliminar la solicitud aceptada de la tabla
         setEventRequests((prevRequests) =>

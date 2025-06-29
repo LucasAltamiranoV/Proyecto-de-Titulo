@@ -1,4 +1,3 @@
-import React from 'react';
 import '../../styles/Components/Valoracion.css';  // Asegúrate de que esta ruta sea correcta para los estilos
 
 /**

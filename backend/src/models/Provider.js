@@ -22,6 +22,7 @@ const proveedorSchema = new mongoose.Schema({
     inicio: { type: Date, required: true },
     fin: { type: Date, required: true },
     todoElDia: { type: Boolean, default: false },
+    clienteId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' } 
   }],
     eventRequests: [{  // Solicitudes de eventos pendientes
     titulo: { type: String, required: true },
